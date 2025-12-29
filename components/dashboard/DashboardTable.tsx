@@ -1,7 +1,7 @@
 import { Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { DashboardItem, TabType } from '@/types/dashboard';
-import type { Mahalla } from '@/types/dashboard';
+import type { Mahalla, Street } from '@/types/dashboard';
 
 interface DashboardTableProps {
   activeTab: TabType;
@@ -94,6 +94,58 @@ export function DashboardTable({
                   1C kodi
                 </th>
               </>
+            ) : activeTab === 'streets' ? (
+              <>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Viloyat
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Tuman
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Nomi
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Turi
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Kodi
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Mahalla bog&apos;lanishi
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs font-medium ${
+                    darkMode ? 'text-gray-300' : 'text-gray-600'
+                  } uppercase tracking-wider`}
+                >
+                  Avvalgi nomi
+                </th>
+              </>
             ) : (
               <>
                 <th
@@ -130,7 +182,9 @@ export function DashboardTable({
           {data.length === 0 ? (
             <tr>
               <td
-                colSpan={activeTab === 'mahallas' ? 9 : 4}
+                colSpan={
+                  activeTab === 'mahallas' ? 9 : activeTab === 'streets' ? 9 : 4
+                }
                 className='px-6 py-12 text-center'
               >
                 <div
@@ -138,7 +192,7 @@ export function DashboardTable({
                     darkMode ? 'text-gray-400' : 'text-gray-500'
                   }`}
                 >
-                  Ma'lumot topilmadi
+                  Ma&apos;lumot topilmadi
                 </div>
               </td>
             </tr>
@@ -217,6 +271,58 @@ export function DashboardTable({
                         }`}
                       >
                         {(item as Mahalla).oneId || '—'}
+                      </td>
+                    </>
+                  ) : activeTab === 'streets' ? (
+                    <>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {(item as Street).district.region.nameUz}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {(item as Street).district.nameUz}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {item.nameUz}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {(item as Street).type || '—'}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {item.code}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {(item as Street)?.mahalla?.nameUz || '—'}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? 'text-white' : 'text-gray-900'
+                        }`}
+                      >
+                        {(item as Street).oldName || '—'}
                       </td>
                     </>
                   ) : (

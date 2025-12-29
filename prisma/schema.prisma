@@ -72,7 +72,7 @@ model Mahalla {
   district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
   districtId String
 
-  streets MahallaStreet[]
+  streets Street[]
 
   @@index([nameUz])
   @@index([hidden])
@@ -80,40 +80,24 @@ model Mahalla {
 }
 
 model Street {
-  id                  String  @id @default(cuid())
-  nameUz              String
-  nameRu              String?
-  code                String  @unique
-  geometry            Json
-  center              Json?
-  childName           String?
-  streetStatus        String?
-  plaque              String?
-  streetId            String?
-  streetCoordinatesId String?
+  id        String  @id @default(cuid())
+  nameUz    String
+  nameRu    String?
+  code      String  @unique
+  geometry  Json
+  center    Json?
+  type      String
+  oldNameId String?
+  oldName   String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  mahallas   MahallaStreet[]
-  district   District        @relation(fields: [districtId], references: [id])
+  mahalla    Mahalla  @relation(fields: [mahallaId], references: [code], onDelete: Cascade)
+  mahallaId  String
+  district   District @relation(fields: [districtId], references: [id])
   districtId String
 
   @@index([nameUz])
   @@map("streets")
-}
-
-model MahallaStreet {
-  id String @id @default(cuid())
-
-  mahallaId String
-  streetId  String
-
-  mahalla Mahalla @relation(fields: [mahallaId], references: [id], onDelete: Cascade)
-  street  Street  @relation(fields: [streetId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-
-  @@unique([mahallaId, streetId])
-  @@map("mahalla_street")
 }

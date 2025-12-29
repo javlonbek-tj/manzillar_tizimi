@@ -46,6 +46,11 @@ async function getDashboardData() {
         nameRu: true,
         code: true,
         districtId: true,
+        type: true,
+        oldName: true,
+        mahalla: {
+          select: { nameUz: true },
+        },
         district: {
           select: {
             nameUz: true,

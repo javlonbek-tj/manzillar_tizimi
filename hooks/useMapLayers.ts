@@ -270,15 +270,21 @@ export function useMapLayers() {
           icon: L.divIcon({
             className: 'mahalla-label',
             html: `<div style="
-              color: white;
+              background: rgba(255, 255, 255, 0.9);
+              color: #1f2937;
+              padding: 4px 8px;
+              border-radius: 6px;
               font-weight: 500;
               font-size: 10px;
-              text-shadow: 1px 1px 2px rgba(0,0,0,0.8), -1px -1px 1px rgba(0,0,0,0.8);
-              white-space: nowrap;
+              text-shadow: none;
+              box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+              white-space: normal;
+              word-break: break-word;
               pointer-events: none;
               text-align: center;
+              max-width: 80px;
             ">${feature.properties.nameUz}</div>`,
-            iconSize: [60, 20],
+            iconSize: [100, 40],
           }),
         }).addTo(map);
 
@@ -296,12 +302,19 @@ export function useMapLayers() {
             if (!streetsLayer) return;
 
             // Clear previous mahalla street labels (markers)
-            if (selectedMahallaRef.current && selectedMahallaRef.current.streets.length) {
+            if (
+              selectedMahallaRef.current &&
+              selectedMahallaRef.current.streets.length
+            ) {
               selectedMahallaRef.current.streets.forEach((item: any) => {
                 try {
                   if (item.marker) map.removeLayer(item.marker);
                   const sLayer = item.layer || item;
-                  if (selectedStreetRef.current && selectedStreetRef.current === sLayer) return;
+                  if (
+                    selectedStreetRef.current &&
+                    selectedStreetRef.current === sLayer
+                  )
+                    return;
                   if (sLayer.getTooltip?.()) sLayer.unbindTooltip();
                   (streetsLayer as any).resetStyle(sLayer);
                 } catch (err) {
@@ -358,7 +371,10 @@ export function useMapLayers() {
               }
             });
 
-            selectedMahallaRef.current = { id: feature.properties?.id, streets: matched };
+            selectedMahallaRef.current = {
+              id: feature.properties?.id,
+              streets: matched,
+            };
           } catch (err) {
             // eslint-disable-next-line no-console
             console.warn('mahalla click handler error', err);
@@ -397,22 +413,34 @@ export function useMapLayers() {
       try {
         if (selectedStreetRef.current) {
           try {
-            (layersRef.current.streets as any).resetStyle(selectedStreetRef.current);
+            (layersRef.current.streets as any).resetStyle(
+              selectedStreetRef.current
+            );
           } catch (err) {
             // eslint-disable-next-line no-console
-            console.warn('clearLayers: failed to reset selected street style', err);
+            console.warn(
+              'clearLayers: failed to reset selected street style',
+              err
+            );
           }
           try {
-            if (selectedStreetRef.current.getTooltip?.()) selectedStreetRef.current.unbindTooltip();
+            if (selectedStreetRef.current.getTooltip?.())
+              selectedStreetRef.current.unbindTooltip();
           } catch (err) {
             // eslint-disable-next-line no-console
-            console.warn('clearLayers: failed to unbind tooltip from selected street', err);
+            console.warn(
+              'clearLayers: failed to unbind tooltip from selected street',
+              err
+            );
           }
           selectedStreetRef.current = null;
         }
 
         // Clear any mahalla-bound street labels (may contain marker + layer)
-        if (selectedMahallaRef.current && selectedMahallaRef.current.streets.length) {
+        if (
+          selectedMahallaRef.current &&
+          selectedMahallaRef.current.streets.length
+        ) {
           selectedMahallaRef.current.streets.forEach((item: any) => {
             try {
               const sLayer = item.layer || item;
@@ -423,14 +451,20 @@ export function useMapLayers() {
               }
             } catch (err) {
               // eslint-disable-next-line no-console
-              console.warn('clearLayers: failed to clear mahalla street label', err);
+              console.warn(
+                'clearLayers: failed to clear mahalla street label',
+                err
+              );
             }
           });
           selectedMahallaRef.current = { id: null, streets: [] };
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.warn('clearLayers: error handling selected street/mahalla', err);
+        console.warn(
+          'clearLayers: error handling selected street/mahalla',
+          err
+        );
       }
 
       map.removeLayer(layersRef.current.streets);
@@ -459,7 +493,11 @@ export function useMapLayers() {
           layer.bindPopup(`
             <div style="padding:8px; font-size: 12px;">
               <strong>${feature.properties.nameUz}</strong>
-              ${feature.properties.nameRu ? `<br/>${feature.properties.nameRu}` : ''}
+              ${
+                feature.properties.nameRu
+                  ? `<br/>${feature.properties.nameRu}`
+                  : ''
+              }
             </div>
           `);
         }
@@ -475,7 +513,10 @@ export function useMapLayers() {
           try {
             const name = feature.properties?.nameUz;
             // clear previous selection
-            if (selectedStreetRef.current && selectedStreetRef.current !== layer) {
+            if (
+              selectedStreetRef.current &&
+              selectedStreetRef.current !== layer
+            ) {
               try {
                 // reset style of previously selected feature
                 (streetsLayer as any).resetStyle(selectedStreetRef.current);
@@ -489,7 +530,10 @@ export function useMapLayers() {
                 selectedStreetRef.current.unbindPopup?.();
               } catch (err) {
                 // eslint-disable-next-line no-console
-                console.warn('failed to close/unbind popup from previous selection', err);
+                console.warn(
+                  'failed to close/unbind popup from previous selection',
+                  err
+                );
               }
               try {
                 if (selectedStreetRef.current.getTooltip?.()) {
@@ -497,7 +541,10 @@ export function useMapLayers() {
                 }
               } catch (err) {
                 // eslint-disable-next-line no-console
-                console.warn('failed to unbind tooltip from previous selection', err);
+                console.warn(
+                  'failed to unbind tooltip from previous selection',
+                  err
+                );
               }
               selectedStreetRef.current = null;
             }
@@ -554,7 +601,11 @@ export function useMapLayers() {
       // Validate geometry
       if (!geom || !geom.type) {
         // eslint-disable-next-line no-console
-        console.warn('loadStreetsLayer: Invalid geometry for street', s.id, geom);
+        console.warn(
+          'loadStreetsLayer: Invalid geometry for street',
+          s.id,
+          geom
+        );
         return;
       }
 
@@ -623,9 +674,7 @@ export function useMapLayers() {
     }
   };
 
-  const getLayer = (
-    type: 'regions' | 'districts' | 'mahallas' | 'streets'
-  ) => {
+  const getLayer = (type: 'regions' | 'districts' | 'mahallas' | 'streets') => {
     return layersRef.current[type];
   };
 
@@ -682,10 +731,14 @@ export function useMapLayers() {
           if (!el) return;
           if (el.classList.contains('street-selected-tooltip')) {
             el.style.color = isDark ? 'white' : '#1f2937';
-            el.style.background = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.93)';
+            el.style.background = isDark
+              ? 'rgba(0,0,0,0.6)'
+              : 'rgba(255,255,255,0.93)';
             el.style.padding = '4px 8px';
             el.style.borderRadius = '6px';
-            el.style.boxShadow = `0 2px 6px ${isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'}`;
+            el.style.boxShadow = `0 2px 6px ${
+              isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
+            }`;
             el.style.fontWeight = '600';
             el.style.whiteSpace = 'nowrap';
           }
@@ -694,7 +747,9 @@ export function useMapLayers() {
             const inner = el.querySelector('div');
             if (inner) {
               inner.style.color = isDark ? 'white' : '#1f2937';
-              inner.style.background = isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.93)';
+              inner.style.background = isDark
+                ? 'rgba(0,0,0,0.6)'
+                : 'rgba(255,255,255,0.93)';
               inner.style.padding = '2px 6px';
               inner.style.borderRadius = '6px';
               inner.style.boxShadow = isDark
@@ -707,7 +762,10 @@ export function useMapLayers() {
         });
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.warn('refreshLabels: error updating selected street tooltip style', err);
+        console.warn(
+          'refreshLabels: error updating selected street tooltip style',
+          err
+        );
       }
     }
   };

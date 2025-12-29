@@ -10,7 +10,12 @@ function convertGeometry(geometry: any): any {
 }
 
 async function main() {
-  const filePath = path.join(process.cwd(), 'prisma', 'data', 'streets.geojson');
+  const filePath = path.join(
+    process.cwd(),
+    'prisma',
+    'data',
+    'Sirdaryo_vil_street.geojson'
+  );
 
   if (!fs.existsSync(filePath)) {
     console.error('Streets GeoJSON not found at:', filePath);
@@ -33,42 +38,47 @@ async function main() {
 
     // Find the parent district by districtSoato (code)
     const district = await prisma.district.findUnique({
-      where: { code: String(props.districtSoato) },
+      where: { code: String(props.Tuman_shahar_soato_kodi) },
     });
 
     if (!district) {
       console.warn(
-        `⚠️  District not found for street: ${props.name} (districtSoato: ${props.districtSoato})`
+        `⚠️  District not found for street: ${props.Kocha_nomi} (Tuman_shahar_soato_kodi: ${props.Tuman_shahar_soato_kodi})`
       );
       skipCount++;
       continue;
     }
 
     // Skip if streetId (code) is null
-    if (!props.streetId) {
-      console.warn(
-        `⚠️  Skipping street without streetId: ${props.name}`
-      );
+    if (!props.Kocha_ID) {
+      console.warn(`⚠️  Skipping street without Kocha_ID: ${props.Kocha_nomi}`);
       skipCount++;
       continue;
     }
 
     const geometry = convertGeometry(feature.geometry);
-    
+
     // Validate geometry has valid coordinates
-    if (!geometry || !geometry.coordinates || geometry.coordinates.length === 0) {
-      console.warn(`⚠️  Invalid geometry for street: ${props.name}`);
+    if (
+      !geometry ||
+      !geometry.coordinates ||
+      geometry.coordinates.length === 0
+    ) {
+      console.warn(`⚠️  Invalid geometry for street: ${props.Kocha_nomi}`);
       invalidCoordCount++;
       skipCount++;
       continue;
     }
 
     // For LineString, check if coords are in valid range (Uzbekistan bounds)
-    if (geometry.type === 'LineString' && Array.isArray(geometry.coordinates[0])) {
+    if (
+      geometry.type === 'LineString' &&
+      Array.isArray(geometry.coordinates[0])
+    ) {
       const [lng, lat] = geometry.coordinates[0];
       if (lng < 50 || lng > 75 || lat < 35 || lat > 50) {
         console.warn(
-          `⚠️  Coordinates out of Uzbekistan bounds for ${props.name}: [${lng}, ${lat}]`
+          `⚠️  Coordinates out of Uzbekistan bounds for ${props.Kocha_nomi}: [${lng}, ${lat}]`
         );
         invalidCoordCount++;
         skipCount++;
@@ -81,43 +91,44 @@ async function main() {
       const c = centroid(geometry);
       center = c.geometry;
     } catch (error) {
-      console.warn(`⚠️  Could not calculate center for: ${props.name}`);
+      console.warn(`⚠️  Could not calculate center for: ${props.Kocha_nomi}`);
       center = null;
     }
 
     try {
       await prisma.street.upsert({
-        where: { code: String(props.streetId) },
+        where: { code: String(props.Kocha_ID) },
+
         update: {
-          nameUz: props.name || 'Unknown',
-          nameRu: props.ruName || null,
+          nameUz: props.Kocha_nomi || 'Unknown',
+          nameRu: null,
           geometry,
           center,
-          childName: props.childName || null,
-          streetStatus: props.kochaxolati || null,
-          plaque: props.peshtaxta || null,
-          streetId: props.streetId ? String(props.streetId) : null,
-          streetCoordinatesId: props.streetCoordinatesId ? String(props.streetCoordinatesId) : null,
+          code: String(props.Kocha_ID),
           districtId: district.id,
+          type: props.Kocha_turi,
+          oldNameId: props.Kochaning_avvalgi_ID || null,
+          oldName: props.Kochaning_avvalgi_nomi || null,
+          mahallaId: String(props.Mahalla_soato_kodi_1),
         },
+
         create: {
-          nameUz: props.name || 'Unknown',
-          nameRu: props.ruName || null,
-          code: String(props.streetId),
-          districtId: district.id,
+          nameUz: props.Kocha_nomi || 'Unknown',
+          nameRu: null,
           geometry,
           center,
-          childName: props.childName || null,
-          streetStatus: props.kochaxolati || null,
-          plaque: props.peshtaxta || null,
-          streetId: props.streetId ? String(props.streetId) : null,
-          streetCoordinatesId: props.streetCoordinatesId ? String(props.streetCoordinatesId) : null,
+          code: String(props.Kocha_ID),
+          districtId: district.id,
+          type: props.Kocha_turi,
+          oldNameId: props.Kochaning_avvalgi_ID || null,
+          oldName: props.Kochaning_avvalgi_nomi || null,
+          mahallaId: String(props.Mahalla_soato_kodi_1),
         },
       });
 
       successCount++;
       console.log(
-        `✓ Inserted street: ${props.name} (District: ${district.nameUz})`
+        `✓ Inserted street: ${props.Kocha_nomi} (District: ${district.nameUz})`
       );
     } catch (error) {
       console.error(`❌ Error inserting street ${props.name}:`, error);

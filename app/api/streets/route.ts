@@ -18,7 +18,10 @@ export async function GET(request: Request) {
           nameUz: true,
           nameRu: true,
           code: true,
+          type: true,
+          oldName: true,
           districtId: true,
+          mahallaId: true,
           geometry: true,
           center: true,
           district: {
@@ -30,6 +33,11 @@ export async function GET(request: Request) {
                   nameUz: true,
                 },
               },
+            },
+          },
+          mahalla: {
+            select: {
+              nameUz: true,
             },
           },
         },
@@ -48,7 +56,10 @@ export async function GET(request: Request) {
           nameUz: true,
           nameRu: true,
           code: true,
+          type: true,
+          oldName: true,
           districtId: true,
+          mahallaId: true,
           geometry: true,
           center: true,
           district: {
@@ -60,6 +71,11 @@ export async function GET(request: Request) {
                   nameUz: true,
                 },
               },
+            },
+          },
+          mahalla: {
+            select: {
+              nameUz: true,
             },
           },
         },

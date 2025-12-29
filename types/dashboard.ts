@@ -38,11 +38,17 @@ export type Street = {
   nameUz: string;
   nameRu: string | null;
   code: string;
+  type: string;
+  oldName: string | null;
   districtId: string;
+  mahallaId: string;
   district: {
     nameUz: string;
     regionId: string;
     region: { nameUz: string };
+  };
+  mahalla: {
+    nameUz: string;
   };
 };
 
