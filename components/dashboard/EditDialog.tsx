@@ -88,8 +88,7 @@ export function EditDialog({
     }
   }, [item]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!item) return;
 
     setLoading(true);
@@ -182,16 +181,19 @@ export function EditDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={
+        className={`max-w-3xl ${
           darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-        }
+        }`}
       >
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
-          <DialogDescription>Ma'lumotlarni o'zgartiring</DialogDescription>
+          <DialogDescription className='sr-only'>
+            Ma'lumotlarni o'zgartiring
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className='space-y-4 py-4'>
+        <div className='space-y-4 py-4'>
+          {/* First row: Nomi (O'zbekcha) and Nomi (Ruscha) */}
+          <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
               <Label htmlFor='edit-nameUz'>Nomi (O'zbekcha) *</Label>
               <Input
@@ -216,7 +218,10 @@ export function EditDialog({
                 className={darkMode ? 'bg-gray-700 text-white' : ''}
               />
             </div>
+          </div>
 
+          {/* Second row: Soato kodi and Viloyat (if needed) */}
+          {activeTab === 'regions' ? (
             <div className='space-y-2'>
               <Label htmlFor='edit-code'>Soato kodi *</Label>
               <Input
@@ -229,10 +234,21 @@ export function EditDialog({
                 className={darkMode ? 'bg-gray-700 text-white' : ''}
               />
             </div>
+          ) : (
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='edit-code'>Soato kodi *</Label>
+                <Input
+                  id='edit-code'
+                  value={formData.code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, code: e.target.value })
+                  }
+                  required
+                  className={darkMode ? 'bg-gray-700 text-white' : ''}
+                />
+              </div>
 
-            {(activeTab === 'districts' ||
-              activeTab === 'mahallas' ||
-              activeTab === 'streets') && (
               <div className='space-y-2'>
                 <Label htmlFor='edit-regionId'>Viloyat *</Label>
                 <select
@@ -265,41 +281,72 @@ export function EditDialog({
                   ))}
                 </select>
               </div>
-            )}
+            </div>
+          )}
 
-            {(activeTab === 'mahallas' || activeTab === 'streets') && (
-              <div className='space-y-2'>
-                <Label htmlFor='edit-districtId'>Tuman *</Label>
-                <select
-                  id='edit-districtId'
-                  value={formData.districtId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, districtId: e.target.value })
-                  }
-                  required
-                  disabled={!formData.regionId}
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } ${
-                    !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <option value=''>Tuman tanlang</option>
-                  {districts
-                    .filter((d) => d.regionId === formData.regionId)
-                    .map((district) => (
-                      <option key={district.id} value={district.id}>
-                        {district.nameUz}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
+          {/* Tuman field for streets */}
+          {activeTab === 'streets' && (
+            <div className='space-y-2'>
+              <Label htmlFor='edit-districtId'>Tuman *</Label>
+              <select
+                id='edit-districtId'
+                value={formData.districtId}
+                onChange={(e) =>
+                  setFormData({ ...formData, districtId: e.target.value })
+                }
+                required
+                disabled={!formData.regionId}
+                className={`w-full px-3 py-2 rounded-md border ${
+                  darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <option value=''>Tuman tanlang</option>
+                {districts
+                  .filter((d) => d.regionId === formData.regionId)
+                  .map((district) => (
+                    <option key={district.id} value={district.id}>
+                      {district.nameUz}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
 
-            {activeTab === 'mahallas' && (
-              <>
+          {/* Mahalla-specific fields in two columns */}
+          {activeTab === 'mahallas' && (
+            <>
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='edit-districtId'>Tuman *</Label>
+                  <select
+                    id='edit-districtId'
+                    value={formData.districtId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, districtId: e.target.value })
+                    }
+                    required
+                    disabled={!formData.regionId}
+                    className={`w-full px-3 py-2 rounded-md border ${
+                      darkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    } ${
+                      !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <option value=''>Tuman tanlang</option>
+                    {districts
+                      .filter((d) => d.regionId === formData.regionId)
+                      .map((district) => (
+                        <option key={district.id} value={district.id}>
+                          {district.nameUz}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+
                 <div className='space-y-2'>
                   <Label htmlFor='edit-uzKadName'>UzKad nomi</Label>
                   <Input
@@ -311,7 +358,9 @@ export function EditDialog({
                     className={darkMode ? 'bg-gray-700 text-white' : ''}
                   />
                 </div>
+              </div>
 
+              <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='edit-geoCode'>APU kodi</Label>
                   <Input
@@ -335,81 +384,81 @@ export function EditDialog({
                     className={darkMode ? 'bg-gray-700 text-white' : ''}
                   />
                 </div>
+              </div>
 
-                <div className='space-y-2'>
-                  <Label
-                    htmlFor='edit-hidden'
-                    className='flex items-center gap-2'
-                  >
-                    <input
-                      id='edit-hidden'
-                      type='checkbox'
-                      checked={formData.hidden}
+              <div className='space-y-2 flex items-end'>
+                <Label
+                  htmlFor='edit-hidden'
+                  className='flex items-center gap-2'
+                >
+                  <input
+                    id='edit-hidden'
+                    type='checkbox'
+                    checked={formData.hidden}
+                    onChange={(e) =>
+                      setFormData({ ...formData, hidden: e.target.checked })
+                    }
+                    className='w-4 h-4'
+                  />
+                  Yashirilgan
+                </Label>
+              </div>
+
+              {formData.hidden && (
+                <div className='grid grid-cols-2 gap-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='edit-mergedIntoId'>
+                      Birlashtiruvchi mahalla ID
+                    </Label>
+                    <Input
+                      id='edit-mergedIntoId'
+                      value={formData.mergedIntoId}
                       onChange={(e) =>
-                        setFormData({ ...formData, hidden: e.target.checked })
+                        setFormData({
+                          ...formData,
+                          mergedIntoId: e.target.value,
+                        })
                       }
-                      className='w-4 h-4'
+                      placeholder='ID'
+                      className={darkMode ? 'bg-gray-700 text-white' : ''}
                     />
-                    Yashirilgan (birlashtiruvchi mahalla)
-                  </Label>
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor='edit-mergedIntoName'>
+                      Birlashtiruvchi mahalla nomi
+                    </Label>
+                    <Input
+                      id='edit-mergedIntoName'
+                      value={formData.mergedIntoName}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          mergedIntoName: e.target.value,
+                        })
+                      }
+                      placeholder='Nomi'
+                      className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    />
+                  </div>
                 </div>
-
-                {formData.hidden && (
-                  <>
-                    <div className='space-y-2'>
-                      <Label htmlFor='edit-mergedIntoId'>
-                        Birlashtiruvchi mahalla ID
-                      </Label>
-                      <Input
-                        id='edit-mergedIntoId'
-                        value={formData.mergedIntoId}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            mergedIntoId: e.target.value,
-                          })
-                        }
-                        placeholder='Birlashtiruvchi mahallaning ID sini kiriting'
-                        className={darkMode ? 'bg-gray-700 text-white' : ''}
-                      />
-                    </div>
-
-                    <div className='space-y-2'>
-                      <Label htmlFor='edit-mergedIntoName'>
-                        Birlashtiruvchi mahalla nomi
-                      </Label>
-                      <Input
-                        id='edit-mergedIntoName'
-                        value={formData.mergedIntoName}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            mergedIntoName: e.target.value,
-                          })
-                        }
-                        placeholder='Birlashtiruvchi mahallaning nomini kiriting'
-                        className={darkMode ? 'bg-gray-700 text-white' : ''}
-                      />
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Bekor qilish
-            </Button>
-            <Button type='submit' disabled={loading}>
-              {loading ? 'Saqlanmoqda...' : 'Saqlash'}
-            </Button>
-          </DialogFooter>
-        </form>
+              )}
+            </>
+          )}
+        </div>
+        <DialogFooter>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Bekor qilish
+          </Button>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading ? 'Saqlanmoqda...' : 'Saqlash'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

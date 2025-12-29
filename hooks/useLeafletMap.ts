@@ -68,11 +68,27 @@ export function useLeafletMap(
 
       mapInstance.current.removeLayer(tileLayerRef.current);
 
-      tileLayerRef.current = L.tileLayer(baseMaps[newBaseMap].url, {
-        attribution: baseMaps[newBaseMap].attribution,
-        subdomains: newBaseMap === 'satellite' ? '' : 'abcd',
-        maxZoom: 20,
-      }).addTo(mapInstance.current);
+      // Avoid requesting higher-zoom satellite tiles that may not exist;
+      // use a transparent error tile to prevent 'Map data not yet available' placeholders.
+      const TRANSPARENT_TILE =
+        'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+
+      if (newBaseMap === 'satellite') {
+        tileLayerRef.current = L.tileLayer(baseMaps[newBaseMap].url, {
+          attribution: baseMaps[newBaseMap].attribution,
+          subdomains: '',
+          // Esri World_Imagery may not have tiles above zoom 17/18 for some areas.
+          maxNativeZoom: 17,
+          maxZoom: 18,
+          errorTileUrl: TRANSPARENT_TILE,
+        }).addTo(mapInstance.current);
+      } else {
+        tileLayerRef.current = L.tileLayer(baseMaps[newBaseMap].url, {
+          attribution: baseMaps[newBaseMap].attribution,
+          subdomains: 'abcd',
+          maxZoom: 20,
+        }).addTo(mapInstance.current);
+      }
     }
   };
 

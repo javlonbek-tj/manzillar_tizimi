@@ -6,9 +6,11 @@ import 'leaflet/dist/leaflet.css';
 import type { Map } from 'leaflet';
 import type { RegionData, DistrictData, MahallaData } from '@/types/map';
 import type { BaseMapKey } from '@/services/baseMaps';
+import { useTheme } from '@/contexts/ThemeContext';
 
 import { useLeafletMap } from '@/hooks/useLeafletMap';
 import { useMapData } from '@/hooks/useMapData';
+import { fetchStreetsByDistrict, fetchStreetsByRegion } from '@/services/api';
 import { useMapLayers } from '@/hooks/useMapLayers';
 import { useDynamicStats } from '@/hooks/useDynamicStats';
 
@@ -22,6 +24,7 @@ import { Sidebar } from '@/components/sidebar/Sidebar';
 type SidebarLevel = 'regions' | 'districts' | 'mahallas';
 
 const UzbekistanMap = () => {
+  const { theme } = useTheme();
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<Map | null>(null);
   const [sidebarLevel, setSidebarLevel] = useState<SidebarLevel>('regions');
@@ -51,8 +54,10 @@ const UzbekistanMap = () => {
     loadRegionsLayer,
     loadDistrictsLayer,
     loadMahallasLayer,
+    loadStreetsLayer,
     clearLayers,
     getLayer,
+    refreshLabels,
   } = useMapLayers();
 
   const { stats, loading: statsLoading } = useDynamicStats(
@@ -72,6 +77,31 @@ const UzbekistanMap = () => {
       setMapReady(true);
     }
   );
+
+  // Sync map basemap with global theme toggle (dark <-> satellite).
+  useEffect(() => {
+    if (!mapReady || !changeBaseMapInternal) return;
+
+    // If user selected a different basemap explicitly, don't override it on theme change.
+    if (baseMap !== 'dark' && baseMap !== 'satellite') return;
+
+    const desiredBase: BaseMapKey = theme === 'dark' ? 'dark' : 'satellite';
+    if (desiredBase !== baseMap) {
+      // update leaflet tile layer and local state
+      changeBaseMapInternal(desiredBase).catch((err) => {
+        // swallow errors but log for debugging
+        // eslint-disable-next-line no-console
+        console.error('Failed to change base map on theme change', err);
+      });
+      setBaseMap(desiredBase);
+    }
+
+    // Refresh label colors when theme changes
+    const map = mapInstanceRef.current;
+    if (map) {
+      refreshLabels(map);
+    }
+  }, [theme, mapReady, baseMap, changeBaseMapInternal, refreshLabels]);
 
   const handleDistrictClick = useCallback(
     async (districtId: string) => {
@@ -115,8 +145,26 @@ const UzbekistanMap = () => {
 
       const mahallasData = await loadMahallas(districtId);
       await loadMahallasLayer(map, L, mahallasData);
+
+      // load streets for this district and show together
+      try {
+        const streets = await fetchStreetsByDistrict(districtId);
+        // eslint-disable-next-line no-console
+        console.log('Streets API response for district:', districtId, streets);
+        if (streets && Array.isArray(streets)) {
+          // eslint-disable-next-line no-console
+          console.log('Loading', streets.length, 'streets to map');
+          await loadStreetsLayer(map, L as any, streets);
+        } else {
+          // eslint-disable-next-line no-console
+          console.warn('Streets API returned non-array:', streets);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load streets for district', err);
+      }
     },
-    [districts, getLayer, loadMahallas, loadMahallasLayer]
+    [districts, getLayer, loadMahallas, loadMahallasLayer, loadStreetsLayer]
   );
 
   const handleRegionClick = useCallback(
@@ -162,8 +210,26 @@ const UzbekistanMap = () => {
 
       const districtsData = await loadDistricts(regionId);
       await loadDistrictsLayer(map, L, districtsData, handleDistrictClick);
+
+      // also load streets for the whole region (streets of districts in this region)
+      try {
+        const streets = await fetchStreetsByRegion(regionId);
+        // eslint-disable-next-line no-console
+        console.log('Streets API response for region:', regionId, streets);
+        if (streets && Array.isArray(streets)) {
+          // eslint-disable-next-line no-console
+          console.log('Loading', streets.length, 'streets to map');
+          await loadStreetsLayer(map, L as any, streets);
+        } else {
+          // eslint-disable-next-line no-console
+          console.warn('Streets API returned non-array:', streets);
+        }
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load streets for region', err);
+      }
     },
-    [regions, getLayer, loadDistricts, loadDistrictsLayer, handleDistrictClick]
+    [regions, getLayer, loadDistricts, loadDistrictsLayer, handleDistrictClick, loadStreetsLayer]
   );
 
   // Load regions layer when both map and regions data are ready
@@ -220,6 +286,76 @@ const UzbekistanMap = () => {
     [setSelectedMahalla, getLayer]
   );
 
+  // Smart back navigation - goes one level up
+  const handleBack = useCallback(async () => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const L = (await import('leaflet')).default as unknown as Parameters<
+      typeof loadRegionsLayer
+    >[1];
+
+    // If we're at mahallas level, go back to districts
+    if (sidebarLevel === 'mahallas' && selectedRegion) {
+      // Clear mahallas and streets layers
+      if (getLayer('mahallas')) {
+        getLayer('mahallas')?.eachLayer((layer: any) => {
+          if (layer.label) map.removeLayer(layer.label);
+        });
+        map.removeLayer(getLayer('mahallas')!);
+      }
+      if (getLayer('streets')) {
+        map.removeLayer(getLayer('streets')!);
+      }
+
+      setSelectedMahalla(null);
+      setSelectedDistrict(null);
+      setSidebarLevel('districts');
+      
+      // Reload districts layer for the selected region
+      const districtsData = await loadDistricts(selectedRegion.id);
+      await loadDistrictsLayer(map, L, districtsData, handleDistrictClick);
+
+      // Reload streets for the region
+      try {
+        const streets = await fetchStreetsByRegion(selectedRegion.id);
+        if (streets && Array.isArray(streets)) {
+          await loadStreetsLayer(map, L as any, streets);
+        }
+      } catch (err) {
+        console.error('Failed to load streets for region', err);
+      }
+      return;
+    }
+
+    // If we're at districts level, go back to regions
+    if (sidebarLevel === 'districts') {
+      clearLayers(map);
+      setSelectedRegion(null);
+      setSelectedDistrict(null);
+      setSelectedMahalla(null);
+      setSidebarLevel('regions');
+      
+      map.setView([41.377491, 64.585262], 6);
+      if (regions.length > 0) {
+        await loadRegionsLayer(map, L as any, regions, handleRegionClick);
+      }
+      return;
+    }
+  }, [
+    sidebarLevel,
+    selectedRegion,
+    loadDistricts,
+    loadDistrictsLayer,
+    handleDistrictClick,
+    loadStreetsLayer,
+    fetchStreetsByRegion,
+    clearLayers,
+    regions,
+    loadRegionsLayer,
+    handleRegionClick,
+  ]);
+
   const resetView = useCallback(async () => {
     setSidebarLevel('regions');
     const map = mapInstanceRef.current;
@@ -274,11 +410,23 @@ const UzbekistanMap = () => {
   );
 
   return (
-    <div className="relative flex bg-gray-900 w-full h-full overflow-hidden">
+    <div
+      className={`relative flex w-full h-full overflow-hidden transition-colors ${
+        theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'
+      }`}
+    >
       {loading && (
-        <div className="z-50 absolute inset-0 flex justify-center items-center bg-gray-900">
-          <div className="flex flex-col items-center gap-4 text-white text-xl">
-            <Loader2Icon className="w-8 h-8 animate-spin" />
+        <div
+          className={`z-50 absolute inset-0 flex justify-center items-center ${
+            theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'
+          }`}
+        >
+          <div
+            className={`flex flex-col items-center gap-4 text-xl ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}
+          >
+            <Loader2Icon className='w-8 h-8 animate-spin' />
             <p>Xarita yuklanmoqda...</p>
           </div>
         </div>
@@ -300,10 +448,10 @@ const UzbekistanMap = () => {
         onRegionClick={handleRegionClickFromList}
         onDistrictClick={handleDistrictClickFromList}
         onMahallaClick={handleMahallaClick}
-        onBack={resetView}
+        onBack={handleBack}
       />
 
-      <MapContainer ref={mapRef} className="flex-1 w-full h-full" />
+      <MapContainer ref={mapRef} className='flex-1 w-full h-full' />
 
       <BaseMapSwitcher
         currentBaseMap={baseMap}

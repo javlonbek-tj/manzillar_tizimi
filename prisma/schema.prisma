@@ -51,26 +51,26 @@ model District {
 }
 
 model Mahalla {
-  id         String  @id @default(cuid())
-  districtId String
-  nameUz     String
-  nameRu     String?
-  code       String  @unique
-  geometry   Json
-  center     Json?
+  id       String  @id @default(cuid())
+  nameUz   String
+  nameRu   String?
+  code     String  @unique
+  geometry Json
+  center   Json?
 
   uzKadName String?
   geoCode   String?
   oneId     String?
 
-  hidden        Boolean @default(false)
-  mergedIntoId  String?
+  hidden         Boolean @default(false)
+  mergedIntoId   String?
   mergedIntoName String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  district District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  districtId String
 
   streets MahallaStreet[]
 
@@ -80,12 +80,17 @@ model Mahalla {
 }
 
 model Street {
-  id       String  @id @default(cuid())
-  nameUz   String
-  nameRu   String?
-  code     String  @unique
-  geometry Json
-  center   Json?
+  id                  String  @id @default(cuid())
+  nameUz              String
+  nameRu              String?
+  code                String  @unique
+  geometry            Json
+  center              Json?
+  childName           String?
+  streetStatus        String?
+  plaque              String?
+  streetId            String?
+  streetCoordinatesId String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

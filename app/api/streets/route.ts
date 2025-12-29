@@ -19,6 +19,8 @@ export async function GET(request: Request) {
           nameRu: true,
           code: true,
           districtId: true,
+          geometry: true,
+          center: true,
           district: {
             select: {
               nameUz: true,
@@ -47,6 +49,8 @@ export async function GET(request: Request) {
           nameRu: true,
           code: true,
           districtId: true,
+          geometry: true,
+          center: true,
           district: {
             select: {
               nameUz: true,

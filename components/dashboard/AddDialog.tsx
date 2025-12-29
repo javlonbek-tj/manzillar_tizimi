@@ -50,8 +50,7 @@ export function AddDialog({
     mergedIntoName: '',
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setLoading(true);
 
     try {
@@ -125,6 +124,9 @@ export function AddDialog({
         uzKadName: '',
         geoCode: '',
         oneId: '',
+        hidden: false,
+        mergedIntoId: '',
+        mergedIntoName: '',
       });
     } catch (error) {
       console.error('Error creating:', error);
@@ -150,18 +152,19 @@ export function AddDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={
+        className={`max-w-3xl ${
           darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-        }
+        }`}
       >
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
-          <DialogDescription>
+          <DialogDescription className='sr-only'>
             Yangi ma'lumot qo'shish uchun formani to'ldiring
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className='space-y-4 py-4'>
+        <div className='space-y-4 py-4'>
+          {/* First row: Nomi (O'zbekcha) and Nomi (Ruscha) */}
+          <div className='grid grid-cols-2 gap-4'>
             <div className='space-y-2'>
               <Label htmlFor='nameUz'>Nomi (O'zbekcha) *</Label>
               <Input
@@ -186,7 +189,10 @@ export function AddDialog({
                 className={darkMode ? 'bg-gray-700 text-white' : ''}
               />
             </div>
+          </div>
 
+          {/* Second row: Soato kodi and Viloyat (if needed) */}
+          {activeTab === 'regions' ? (
             <div className='space-y-2'>
               <Label htmlFor='code'>Soato kodi *</Label>
               <Input
@@ -199,10 +205,21 @@ export function AddDialog({
                 className={darkMode ? 'bg-gray-700 text-white' : ''}
               />
             </div>
+          ) : (
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='code'>Soato kodi *</Label>
+                <Input
+                  id='code'
+                  value={formData.code}
+                  onChange={(e) =>
+                    setFormData({ ...formData, code: e.target.value })
+                  }
+                  required
+                  className={darkMode ? 'bg-gray-700 text-white' : ''}
+                />
+              </div>
 
-            {(activeTab === 'districts' ||
-              activeTab === 'mahallas' ||
-              activeTab === 'streets') && (
               <div className='space-y-2'>
                 <Label htmlFor='regionId'>Viloyat *</Label>
                 <select
@@ -230,41 +247,42 @@ export function AddDialog({
                   ))}
                 </select>
               </div>
-            )}
+            </div>
+          )}
 
-            {(activeTab === 'mahallas' || activeTab === 'streets') && (
-              <div className='space-y-2'>
-                <Label htmlFor='districtId'>Tuman *</Label>
-                <select
-                  id='districtId'
-                  value={formData.districtId}
-                  onChange={(e) =>
-                    setFormData({ ...formData, districtId: e.target.value })
-                  }
-                  required
-                  disabled={!formData.regionId}
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } ${
-                    !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
-                >
-                  <option value=''>Tuman tanlang</option>
-                  {districts
-                    .filter((d) => d.regionId === formData.regionId)
-                    .map((district) => (
-                      <option key={district.id} value={district.id}>
-                        {district.nameUz}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            )}
+          {/* Mahalla-specific fields in two columns */}
+          {activeTab === 'mahallas' && (
+            <>
+              <div className='grid grid-cols-2 gap-4'>
+                <div className='space-y-2'>
+                  <Label htmlFor='districtId'>Tuman *</Label>
+                  <select
+                    id='districtId'
+                    value={formData.districtId}
+                    onChange={(e) =>
+                      setFormData({ ...formData, districtId: e.target.value })
+                    }
+                    required
+                    disabled={!formData.regionId}
+                    className={`w-full px-3 py-2 rounded-md border ${
+                      darkMode
+                        ? 'bg-gray-700 border-gray-600 text-white'
+                        : 'bg-white border-gray-300 text-gray-900'
+                    } ${
+                      !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                  >
+                    <option value=''>Tuman tanlang</option>
+                    {districts
+                      .filter((d) => d.regionId === formData.regionId)
+                      .map((district) => (
+                        <option key={district.id} value={district.id}>
+                          {district.nameUz}
+                        </option>
+                      ))}
+                  </select>
+                </div>
 
-            {activeTab === 'mahallas' && (
-              <>
                 <div className='space-y-2'>
                   <Label htmlFor='uzKadName'>UzKad nomi</Label>
                   <Input
@@ -276,7 +294,9 @@ export function AddDialog({
                     className={darkMode ? 'bg-gray-700 text-white' : ''}
                   />
                 </div>
+              </div>
 
+              <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='geoCode'>APU kodi</Label>
                   <Input
@@ -300,78 +320,108 @@ export function AddDialog({
                     className={darkMode ? 'bg-gray-700 text-white' : ''}
                   />
                 </div>
+              </div>
 
-                <div className='space-y-2'>
-                  <Label htmlFor='hidden' className='flex items-center gap-2'>
-                    <input
-                      id='hidden'
-                      type='checkbox'
-                      checked={formData.hidden}
+              <div className='space-y-2 flex items-end'>
+                <Label htmlFor='hidden' className='flex items-center gap-2'>
+                  <input
+                    id='hidden'
+                    type='checkbox'
+                    checked={formData.hidden}
+                    onChange={(e) =>
+                      setFormData({ ...formData, hidden: e.target.checked })
+                    }
+                    className='w-4 h-4'
+                  />
+                  Yashirilgan
+                </Label>
+              </div>
+
+              {formData.hidden && (
+                <div className='grid grid-cols-2 gap-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='mergedIntoId'>
+                      Birlashtiruvchi mahalla ID
+                    </Label>
+                    <Input
+                      id='mergedIntoId'
+                      value={formData.mergedIntoId}
                       onChange={(e) =>
-                        setFormData({ ...formData, hidden: e.target.checked })
+                        setFormData({
+                          ...formData,
+                          mergedIntoId: e.target.value,
+                        })
                       }
-                      className='w-4 h-4'
+                      placeholder='ID'
+                      className={darkMode ? 'bg-gray-700 text-white' : ''}
                     />
-                    Yashirilgan (birlashtiruvchi mahalla)
-                  </Label>
+                  </div>
+
+                  <div className='space-y-2'>
+                    <Label htmlFor='mergedIntoName'>
+                      Birlashtiruvchi mahalla nomi
+                    </Label>
+                    <Input
+                      id='mergedIntoName'
+                      value={formData.mergedIntoName}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          mergedIntoName: e.target.value,
+                        })
+                      }
+                      placeholder='Nomi'
+                      className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    />
+                  </div>
                 </div>
+              )}
+            </>
+          )}
 
-                {formData.hidden && (
-                  <>
-                    <div className='space-y-2'>
-                      <Label htmlFor='mergedIntoId'>
-                        Birlashtiruvchi mahalla ID
-                      </Label>
-                      <Input
-                        id='mergedIntoId'
-                        value={formData.mergedIntoId}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            mergedIntoId: e.target.value,
-                          })
-                        }
-                        placeholder='Birlashtiruvchi mahallaning ID sini kiriting'
-                        className={darkMode ? 'bg-gray-700 text-white' : ''}
-                      />
-                    </div>
-
-                    <div className='space-y-2'>
-                      <Label htmlFor='mergedIntoName'>
-                        Birlashtiruvchi mahalla nomi
-                      </Label>
-                      <Input
-                        id='mergedIntoName'
-                        value={formData.mergedIntoName}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            mergedIntoName: e.target.value,
-                          })
-                        }
-                        placeholder='Birlashtiruvchi mahallaning nomini kiriting'
-                        className={darkMode ? 'bg-gray-700 text-white' : ''}
-                      />
-                    </div>
-                  </>
-                )}
-              </>
-            )}
-          </div>
-          <DialogFooter>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Bekor qilish
-            </Button>
-            <Button type='submit' disabled={loading}>
-              {loading ? 'Saqlanmoqda...' : "Qo'shish"}
-            </Button>
-          </DialogFooter>
-        </form>
+          {/* Tuman field for streets */}
+          {activeTab === 'streets' && (
+            <div className='space-y-2'>
+              <Label htmlFor='districtId'>Tuman *</Label>
+              <select
+                id='districtId'
+                value={formData.districtId}
+                onChange={(e) =>
+                  setFormData({ ...formData, districtId: e.target.value })
+                }
+                required
+                disabled={!formData.regionId}
+                className={`w-full px-3 py-2 rounded-md border ${
+                  darkMode
+                    ? 'bg-gray-700 border-gray-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                <option value=''>Tuman tanlang</option>
+                {districts
+                  .filter((d) => d.regionId === formData.regionId)
+                  .map((district) => (
+                    <option key={district.id} value={district.id}>
+                      {district.nameUz}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          )}
+        </div>
+        <DialogFooter>
+          <Button
+            type='button'
+            variant='outline'
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+          >
+            Bekor qilish
+          </Button>
+          <Button onClick={handleSubmit} disabled={loading}>
+            {loading ? 'Saqlanmoqda...' : "Qo'shish"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

@@ -6,7 +6,7 @@ export const baseMaps = {
     label: "Qorong'i",
   },
   light: {
-    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     attribution: '&copy; OpenStreetMap',
     label: "Yorug'",
   },
