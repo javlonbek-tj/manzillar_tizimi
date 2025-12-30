@@ -45,3 +45,6 @@ export const fetchRealEstateByMahalla = (mahallaName: string) =>
   fetch(`/api/real-estate?mahalla=${encodeURIComponent(mahallaName)}`).then(
     (res) => res.json()
   );
+
+export const fetchSvodData = () =>
+  fetch('/api/svod').then((res) => res.json());

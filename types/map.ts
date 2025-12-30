@@ -119,3 +119,28 @@ export interface RealEstateData {
 }
 
 export type ZoomLevel = 'regions' | 'districts' | 'mahallas' | 'streets';
+
+export interface SvodStats {
+  mahallaCount: number;
+  streetCount: number;
+  realEstateCount: number;
+}
+
+export interface SvodDistrict {
+  id: string;
+  nameUz: string;
+  code: string;
+  stats: SvodStats;
+}
+
+export interface SvodRegion {
+  id: string;
+  nameUz: string;
+  code: string;
+  stats: SvodStats;
+  districts: SvodDistrict[];
+}
+
+export interface SvodData {
+  regions: SvodRegion[];
+}
