@@ -10,7 +10,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 import { useLeafletMap } from '@/hooks/useLeafletMap';
 import { useMapData } from '@/hooks/useMapData';
-import { fetchStreetsByDistrict, fetchStreetsByRegion } from '@/services/api';
+import { fetchStreetsByDistrict, fetchStreetsByRegion, fetchRealEstateByRegion, fetchRealEstateByDistrict, fetchRealEstateByMahalla } from '@/services/api';
 import { useMapLayers } from '@/hooks/useMapLayers';
 import { useDynamicStats } from '@/hooks/useDynamicStats';
 
@@ -55,6 +55,7 @@ const UzbekistanMap = () => {
     loadDistrictsLayer,
     loadMahallasLayer,
     loadStreetsLayer,
+    loadRealEstateLayer,
     clearLayers,
     getLayer,
     refreshLabels,
@@ -144,7 +145,19 @@ const UzbekistanMap = () => {
       setSidebarLevel('mahallas');
 
       const mahallasData = await loadMahallas(districtId);
-      await loadMahallasLayer(map, L, mahallasData);
+      await loadMahallasLayer(map, L, mahallasData, handleMahallaClick);
+
+      // Load Real Estate for the district (Background)
+      try {
+        const realEstates = await fetchRealEstateByDistrict(districtId);
+        // eslint-disable-next-line no-console
+        console.log('RealEstate fetched for district:', districtId, realEstates?.length);
+        if (realEstates && Array.isArray(realEstates)) {
+           await loadRealEstateLayer(map, L as any, realEstates);
+        }
+      } catch (err) {
+        console.error('Failed to load real estate for district', err);
+      }
 
       // load streets for this district and show together
       try {
@@ -164,7 +177,7 @@ const UzbekistanMap = () => {
         console.error('Failed to load streets for district', err);
       }
     },
-    [districts, getLayer, loadMahallas, loadMahallasLayer, loadStreetsLayer]
+    [districts, getLayer, loadMahallas, loadMahallasLayer, loadStreetsLayer, loadRealEstateLayer]
   );
 
   const handleRegionClick = useCallback(
@@ -211,6 +224,8 @@ const UzbekistanMap = () => {
       const districtsData = await loadDistricts(regionId);
       await loadDistrictsLayer(map, L, districtsData, handleDistrictClick);
 
+
+
       // also load streets for the whole region (streets of districts in this region)
       try {
         const streets = await fetchStreetsByRegion(regionId);
@@ -229,7 +244,7 @@ const UzbekistanMap = () => {
         console.error('Failed to load streets for region', err);
       }
     },
-    [regions, getLayer, loadDistricts, loadDistrictsLayer, handleDistrictClick, loadStreetsLayer]
+    [regions, getLayer, loadDistricts, loadDistrictsLayer, handleDistrictClick, loadStreetsLayer, loadRealEstateLayer]
   );
 
   // Load regions layer when both map and regions data are ready
@@ -259,9 +274,13 @@ const UzbekistanMap = () => {
   ]);
 
   const handleMahallaClick = useCallback(
-    (mahalla: MahallaData) => {
+    async (mahalla: MahallaData) => {
       setSelectedMahalla(mahalla);
       const map = mapInstanceRef.current;
+      const L = (await import('leaflet')).default as unknown as Parameters<
+         typeof loadRealEstateLayer
+       >[1];
+
       if (map && getLayer('mahallas')) {
         getLayer('mahallas')?.eachLayer((layer) => {
           const layerWithFeature = layer as {
@@ -272,15 +291,20 @@ const UzbekistanMap = () => {
             layerWithFeature.feature?.properties?.id === mahalla.id &&
             layerWithFeature.getBounds
           ) {
-            const bounds = layerWithFeature.getBounds();
-            if (bounds) {
-              map.fitBounds(bounds, {
-                padding: [50, 50],
-                maxZoom: 14,
-              });
-            }
+            /* 
+             * Removed fitBounds to prevent auto-zooming. 
+             * User wants to stay at current zoom level when clicking mahalla.
+             */
+             // const bounds = layerWithFeature.getBounds();
+             // if (bounds) {
+             //   map.fitBounds(bounds, {
+             //     padding: [50, 50],
+             //     maxZoom: 19,
+             //   });
+             // }
           }
         });
+
       }
     },
     [setSelectedMahalla, getLayer]
@@ -307,6 +331,10 @@ const UzbekistanMap = () => {
       if (getLayer('streets')) {
         map.removeLayer(getLayer('streets')!);
       }
+      if (getLayer('realEstate')) {
+        map.removeLayer(getLayer('realEstate')!);
+      }
+
 
       setSelectedMahalla(null);
       setSelectedDistrict(null);
@@ -325,6 +353,8 @@ const UzbekistanMap = () => {
       } catch (err) {
         console.error('Failed to load streets for region', err);
       }
+
+
       return;
     }
 
@@ -353,7 +383,9 @@ const UzbekistanMap = () => {
     clearLayers,
     regions,
     loadRegionsLayer,
+    loadRegionsLayer,
     handleRegionClick,
+    loadRealEstateLayer,
   ]);
 
   const resetView = useCallback(async () => {

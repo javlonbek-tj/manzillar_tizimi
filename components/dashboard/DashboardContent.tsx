@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import type { DashboardData, TabType, DashboardItem } from '@/types/dashboard';
-import { useDashboardData } from '@/hooks/useDashboardData';
-import { useDashboardPagination } from '@/hooks/useDashboardPagination';
-import { useDashboardExport } from '@/hooks/useDashboardExport';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import type { DashboardData, TabType, DashboardItem } from "@/types/dashboard";
+import { useDashboardData } from "@/hooks/useDashboardData";
+import { useDashboardPagination } from "@/hooks/useDashboardPagination";
+import { useDashboardExport } from "@/hooks/useDashboardExport";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,13 +15,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Tabs } from './Tabs';
-import { DashboardFilters } from './DashboardFilters';
-import { DashboardTable } from './DashboardTable';
-import { Pagination } from './Pagination';
-import { AddDialog } from './AddDialog';
-import { EditDialog } from './EditDialog';
+} from "@/components/ui/alert-dialog";
+import { Tabs } from "./Tabs";
+import { DashboardFilters } from "./DashboardFilters";
+import { DashboardTable } from "./DashboardTable";
+import { Pagination } from "./Pagination";
+import { AddDialog } from "./AddDialog";
+import { EditDialog } from "./EditDialog";
 
 export function DashboardContent({
   initialData,
@@ -31,11 +31,11 @@ export function DashboardContent({
   darkMode: boolean;
 }) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabType>('regions');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRegion, setSelectedRegion] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedHidden, setSelectedHidden] = useState('');
+  const [activeTab, setActiveTab] = useState<TabType>("regions");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRegion, setSelectedRegion] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedHidden, setSelectedHidden] = useState("");
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<DashboardItem | null>(null);
@@ -53,12 +53,12 @@ export function DashboardContent({
 
   // Apply hidden filter for mahallas
   const filterByHidden = (data: DashboardItem[]) => {
-    if (activeTab !== 'mahallas' || selectedHidden === '') {
+    if (activeTab !== "mahallas" || selectedHidden === "") {
       return data;
     }
-    const hiddenBool = selectedHidden === 'true';
+    const hiddenBool = selectedHidden === "true";
     return data.filter((item) => {
-      if ('hidden' in item) {
+      if ("hidden" in item) {
         return item.hidden === hiddenBool;
       }
       return true;
@@ -84,16 +84,16 @@ export function DashboardContent({
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
-    setSearchTerm('');
-    setSelectedRegion('');
-    setSelectedDistrict('');
-    setSelectedHidden('');
+    setSearchTerm("");
+    setSelectedRegion("");
+    setSelectedDistrict("");
+    setSelectedHidden("");
     resetPage();
   };
 
   const handleRegionChange = (regionId: string) => {
     setSelectedRegion(regionId);
-    setSelectedDistrict('');
+    setSelectedDistrict("");
     resetPage();
   };
 
@@ -136,37 +136,37 @@ export function DashboardContent({
     setIsDeleting(true);
 
     try {
-      let url = '';
+      let url = "";
       switch (activeTab) {
-        case 'regions':
+        case "regions":
           url = `/api/regions/${itemToDelete.id}`;
           break;
-        case 'districts':
+        case "districts":
           url = `/api/districts/${itemToDelete.id}`;
           break;
-        case 'mahallas':
+        case "mahallas":
           url = `/api/mahallas/${itemToDelete.id}`;
           break;
-        case 'streets':
+        case "streets":
           url = `/api/streets/${itemToDelete.id}`;
           break;
       }
 
       const response = await fetch(url, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to delete');
+        throw new Error(data.error || "Failed to delete");
       }
 
       setDeleteDialogOpen(false);
       setItemToDelete(null);
       router.refresh();
     } catch (error) {
-      console.error('Error deleting:', error);
-      alert(error instanceof Error ? error.message : 'Xatolik yuz berdi');
+      console.error("Error deleting:", error);
+      alert(error instanceof Error ? error.message : "Xatolik yuz berdi");
     } finally {
       setIsDeleting(false);
     }
@@ -178,14 +178,13 @@ export function DashboardContent({
 
   return (
     <div
-      className={`min-h-[calc(100vh-4rem)] transition-colors duration-200 ${
-        darkMode ? 'bg-gray-900' : 'bg-gray-50'
-      }`}
+      className={`min-h-[calc(100vh-4rem)] transition-colors duration-200
+}`}
     >
-      <div className='mx-auto px-6 pt-8 max-w-7xl'>
+      <div className="mx-auto ">
         <div
           className={`${
-            darkMode ? 'bg-gray-800' : 'bg-white'
+            darkMode ? "bg-gray-800" : "bg-white"
           } rounded-lg shadow-sm`}
         >
           <Tabs
@@ -213,7 +212,7 @@ export function DashboardContent({
             onHiddenChange={setSelectedHidden}
           />
 
-          <div className='p-4'>
+          <div className="p-4">
             <DashboardTable
               activeTab={activeTab}
               data={paginatedData}
@@ -264,14 +263,14 @@ export function DashboardContent({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent
           className={
-            darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
+            darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-900"
           }
         >
           <AlertDialogHeader>
             <AlertDialogTitle>
               Ushbu ma'lumotni o'chirishni xohlaysizmi?
             </AlertDialogTitle>
-            <AlertDialogDescription className={darkMode ? 'text-gray-400' : ''}>
+            <AlertDialogDescription className={darkMode ? "text-gray-400" : ""}>
               Bu amalni qaytarib bo'lmaydi. Iltimos, ehtiyot bo'ling.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -282,7 +281,7 @@ export function DashboardContent({
             <AlertDialogAction
               onClick={confirmDelete}
               disabled={isDeleting}
-              className='bg-red-600 hover:bg-red-700'
+              className="bg-red-600 hover:bg-red-700"
             >
               {isDeleting ? "O'chirilmoqda..." : "O'chirish"}
             </AlertDialogAction>

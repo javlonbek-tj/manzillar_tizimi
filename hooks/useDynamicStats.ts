@@ -11,6 +11,7 @@ interface Stats {
   districts: number;
   mahallas: number;
   streets: number;
+  realEstate: number;
 }
 
 export function useDynamicStats(
@@ -24,6 +25,7 @@ export function useDynamicStats(
     districts: 0,
     mahallas: 0,
     streets: 0,
+    realEstate: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -31,36 +33,27 @@ export function useDynamicStats(
     try {
       setLoading(true);
       if (selectedDistrict) {
-        // Get mahallas count for this district
-        const mahallasCount = mahallas.length;
-
-        // Get streets count for this district
-        const streetsData = await fetchStreetsByDistrict(selectedDistrict.id);
-
+        // Load stats for this district
+        const statsData = await fetchStats(undefined, selectedDistrict.id);
+        
         setStats({
           regions: 1,
           districts: 1,
-          mahallas: mahallasCount,
-          streets: Array.isArray(streetsData) ? streetsData.length : 0,
+          mahallas: statsData.mahallas || mahallas.length, // Fallback to current mahallas length if needed
+          streets: statsData.streets || 0,
+          realEstate: statsData.realEstate || 0,
         });
       } else if (selectedRegion) {
-        // Get districts count for this region
+        // Load stats for this region
+        const statsData = await fetchStats(selectedRegion.id);
         const districtsCount = districts.length;
-
-        // Get total mahallas for this region
-        const mahallasResponse = await fetch(
-          '/api/mahallas?regionId=' + selectedRegion.id
-        );
-        const mahallasData = await mahallasResponse.json();
-
-        // Get total streets for this region
-        const streetsData = await fetchStreetsByRegion(selectedRegion.id);
 
         setStats({
           regions: 1,
           districts: districtsCount,
-          mahallas: Array.isArray(mahallasData) ? mahallasData.length : 0,
-          streets: Array.isArray(streetsData) ? streetsData.length : 0,
+          mahallas: statsData.mahallas || 0,
+          streets: statsData.streets || 0,
+          realEstate: statsData.realEstate || 0,
         });
       } else {
         // Load global stats
@@ -70,6 +63,7 @@ export function useDynamicStats(
           districts: statsData.districts || 0,
           mahallas: statsData.mahallas || 0,
           streets: statsData.streets || 0,
+          realEstate: statsData.realEstate || 0,
         });
       }
     } catch (error) {

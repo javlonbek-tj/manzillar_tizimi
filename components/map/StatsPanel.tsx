@@ -8,6 +8,7 @@ interface Stats {
   districts: number;
   mahallas: number;
   streets: number;
+  realEstate: number;
 }
 
 interface StatsPanelProps {
@@ -76,6 +77,11 @@ export function StatsPanel({
             <div className="flex justify-between gap-4">
               <span className="text-gray-400">Ko'chalar:</span>
               <span className="font-semibold">{stats.streets}</span>
+            </div>
+
+            <div className="flex justify-between gap-4">
+              <span className="text-gray-400">Ko'chmas mulk:</span>
+              <span className="font-semibold">{stats.realEstate}</span>
             </div>
           </>
         )}

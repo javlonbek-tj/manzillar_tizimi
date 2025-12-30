@@ -50,12 +50,12 @@ export function Sidebar({
     <>
       {/* Sidebar */}
       <div
-          className={cn(
-            'w-80 transition-all duration-300 overflow-hidden z-1000 flex flex-col h-full',
-            theme === 'dark' ? 'border-r border-gray-700' : 'border-r border-gray-200',
-            theme === 'dark'
-              ? 'bg-gray-800'
-              : 'bg-white'
+        className={cn(
+          'w-80 transition-all duration-300 overflow-hidden z-1000 flex flex-col h-full',
+          theme === 'dark'
+            ? 'border-r border-gray-700'
+            : 'border-r border-gray-200',
+          theme === 'dark' ? 'bg-gray-800' : 'bg-white'
         )}
       >
         <div
@@ -101,4 +101,3 @@ export function Sidebar({
     </>
   );
 }
-

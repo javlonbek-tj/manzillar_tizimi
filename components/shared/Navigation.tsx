@@ -25,23 +25,23 @@ export function Navigation() {
           : 'bg-white/95 border-gray-200'
       )}
     >
-      <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-        <div className="flex justify-between items-center h-16">
+      <div className='mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl'>
+        <div className='flex justify-between items-center h-16'>
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
+          <Link href='/' className='flex items-center gap-3'>
             <h1
               className={cn(
                 'flex gap-2 font-bold text-xl sm:text-2xl tracking-tight transition-colors',
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               )}
             >
-              <span className="drop-shadow-md text-blue-600">Manzillar</span>
+              <span className='drop-shadow-md text-blue-600'>Manzillar</span>
               <span>tizimi</span>
             </h1>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className='hidden sm:flex items-center gap-2'>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -61,7 +61,7 @@ export function Navigation() {
                       : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                   )}
                 >
-                  <Icon className="mr-2 w-4 h-4" />
+                  <Icon className='mr-2 w-4 h-4' />
                   {item.label}
                 </Link>
               );
@@ -78,9 +78,9 @@ export function Navigation() {
               )}
             >
               {theme === 'dark' ? (
-                <Sun className="w-4 h-4" />
+                <Sun className='w-4 h-4' />
               ) : (
-                <Moon className="w-4 h-4" />
+                <Moon className='w-4 h-4' />
               )}
             </button>
           </div>
@@ -94,7 +94,7 @@ export function Navigation() {
           theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
         )}
       >
-        <div className="space-y-1 px-2 pt-2 pb-3">
+        <div className='space-y-1 px-2 pt-2 pb-3'>
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -114,7 +114,7 @@ export function Navigation() {
                     : 'text-gray-600 hover:bg-gray-100'
                 )}
               >
-                <Icon className="mr-3 w-5 h-5" />
+                <Icon className='mr-3 w-5 h-5' />
                 {item.label}
               </Link>
             );
@@ -132,12 +132,12 @@ export function Navigation() {
           >
             {theme === 'dark' ? (
               <>
-                <Sun className="mr-3 w-5 h-5" />
+                <Sun className='mr-3 w-5 h-5' />
                 Yorug&#39;i rejim
               </>
             ) : (
               <>
-                <Moon className="mr-3 w-5 h-5" />
+                <Moon className='mr-3 w-5 h-5' />
                 Qorong&#39;i rejim
               </>
             )}

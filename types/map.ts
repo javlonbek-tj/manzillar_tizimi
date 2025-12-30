@@ -104,4 +104,18 @@ export interface DashboardStats {
   }>;
 }
 
+export interface RealEstateData {
+  id: string;
+  owner?: string | null;
+  address?: string | null;
+  type?: string | null;
+  districtName?: string | null;
+  streetName?: string | null;
+  houseNumber?: string | null;
+  cadastralNumber?: string | null;
+  mahalla?: string | null;
+  geometry: GeoJSONGeometry;
+  center?: Center | null;
+}
+
 export type ZoomLevel = 'regions' | 'districts' | 'mahallas' | 'streets';

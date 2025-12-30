@@ -45,6 +45,7 @@ model District {
   region   Region    @relation(fields: [regionId], references: [id], onDelete: Cascade)
   mahallas Mahalla[]
   streets  Street[]
+  realEstates RealEState[]
 
   @@index([nameUz])
   @@map("districts")
@@ -100,4 +101,38 @@ model Street {
 
   @@index([nameUz])
   @@map("streets")
+}
+
+model RealEState {
+  id         String   @id @default(cuid())
+  owner      String?
+  address    String?
+  type       String?
+
+  districtId String?
+  district   District? @relation(fields: [districtId], references: [id], onDelete: Cascade)
+
+  districtName String?
+  districtNameUz String? 
+  streetName   String?
+  houseNumber  String?
+
+  ownership       String?
+  ownershipType   String?
+  ownershipDate   String?
+  ownershipNumber String?
+
+  cadastralValue  String?
+  cadastralNumber String?
+  areaInDoc       String?
+  areaReal        String?
+  mahalla         String?
+
+  geometry Json
+  center   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("real_states")
 }

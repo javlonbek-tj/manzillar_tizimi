@@ -6,13 +6,14 @@ import type {
   LatLngExpression,
   DivIcon,
 } from 'leaflet';
-import type { RegionData, DistrictData, MahallaData } from '@/types/map';
+import type { RegionData, DistrictData, MahallaData, RealEstateData } from '@/types/map';
 
 type LayerRefs = {
   regions: GeoJSON | null;
   districts: GeoJSON | null;
   mahallas: GeoJSON | null;
   streets: GeoJSON | null;
+  realEstate: GeoJSON | null;
 };
 
 interface LeafletType {
@@ -34,6 +35,7 @@ export function useMapLayers() {
     districts: null,
     mahallas: null,
     streets: null,
+    realEstate: null,
   });
   const selectedStreetRef = useRef<any>(null);
   const selectedMahallaRef = useRef<{ id: string | null; streets: any[] }>({
@@ -235,7 +237,8 @@ export function useMapLayers() {
   const loadMahallasLayer = async (
     map: LeafletMap,
     L: LeafletType,
-    mahallasData: MahallaData[]
+    mahallasData: MahallaData[],
+    onMahallaClick?: (mahalla: MahallaData) => Promise<void>
   ) => {
     if (layersRef.current.districts) {
       layersRef.current.districts.eachLayer((layer: LayerWithLabel) => {
@@ -290,11 +293,27 @@ export function useMapLayers() {
 
         layer.label = label;
 
+        layer.label = label;
+ 
         // No hover style changes for mahallas to avoid obscuring streets
 
         // Click a mahalla to show street names inside it (without opening mahalla popup)
-        layer.on('click', (e: any) => {
+        layer.on('click', async (e: any) => {
           try {
+            // Trigger external click handler if provided (e.g. for loading RealEstate)
+            if (onMahallaClick) {
+               // Construct mahalla data object from feature properties
+               const mData = {
+                  id: feature.properties.id,
+                  nameUz: feature.properties.nameUz,
+                  nameRu: feature.properties.nameRu,
+                  code: feature.properties.code,
+                  geometry: feature.geometry,
+                  districtId: feature.properties.districtId, // ensure districtId is passed if available
+               } as MahallaData;
+               await onMahallaClick(mData);
+            }
+
             // prevent any bound popup from opening
             layer.closePopup?.();
 
@@ -490,7 +509,7 @@ export function useMapLayers() {
       }),
       onEachFeature: (feature: any, layer: LayerWithLabel) => {
         if (feature.properties && feature.properties.nameUz) {
-          layer.bindPopup(`
+          (layer as any).bindPopup(`
             <div style="padding:8px; font-size: 12px;">
               <strong>${feature.properties.nameUz}</strong>
               ${
@@ -526,8 +545,8 @@ export function useMapLayers() {
               }
               try {
                 // close and unbind any popup on previous selection
-                selectedStreetRef.current.closePopup?.();
-                selectedStreetRef.current.unbindPopup?.();
+                (selectedStreetRef.current as any).closePopup?.();
+                (selectedStreetRef.current as any).unbindPopup?.();
               } catch (err) {
                 // eslint-disable-next-line no-console
                 console.warn(
@@ -557,8 +576,8 @@ export function useMapLayers() {
             if (name) {
               try {
                 // close/unbind any popup that would also show
-                layer.closePopup?.();
-                layer.unbindPopup?.();
+                (layer as any).closePopup?.();
+                (layer as any).unbindPopup?.();
                 if (layer.getTooltip?.()) layer.unbindTooltip();
                 layer.bindTooltip(name, {
                   permanent: true,
@@ -653,6 +672,109 @@ export function useMapLayers() {
     streetsLayer.bringToFront();
   };
 
+  const loadRealEstateLayer = async (
+    map: LeafletMap,
+    L: LeafletType,
+    realEstateData: RealEstateData[]
+  ) => {
+    if (layersRef.current.realEstate) {
+      map.removeLayer(layersRef.current.realEstate);
+      layersRef.current.realEstate = null;
+    }
+
+    const realEstateLayer = L.geoJSON(undefined, {
+      style: {
+        fillColor: '#8b5cf6', // Violet
+        weight: 1,
+        opacity: 1,
+        color: '#7c3aed',
+        fillOpacity: 0.4,
+      },
+      onEachFeature: (feature: any, layer: LayerWithLabel) => {
+        const props = feature.properties;
+        
+        // Improved popup styling
+        const popupContent = `
+          <div style="font-family: inherit; min-width: 200px;">
+            <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #4b5563; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
+              Ko'chmas mulk ma'lumotlari
+            </h3>
+            <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <tbody>
+                ${props.owner ? `
+                  <tr>
+                    <td style="padding: 4px 0; color: #6b7280; font-weight: 500;">Egalik qiluvchi:</td>
+                    <td style="padding: 4px 0 4px 8px; color: #111827; text-align: right;">${props.owner}</td>
+                  </tr>` : ''}
+                ${props.address ? `
+                  <tr style="border-top: 1px solid #f3f4f6;">
+                    <td style="padding: 4px 0; color: #6b7280; font-weight: 500;">Manzil:</td>
+                    <td style="padding: 4px 0 4px 8px; color: #111827; text-align: right;">${props.address}</td>
+                  </tr>` : ''}
+                ${props.type ? `
+                  <tr style="border-top: 1px solid #f3f4f6;">
+                    <td style="padding: 4px 0; color: #6b7280; font-weight: 500;">Turi:</td>
+                    <td style="padding: 4px 0 4px 8px; color: #111827; text-align: right;">${props.type}</td>
+                  </tr>` : ''}
+                ${props.cadastralNumber ? `
+                  <tr style="border-top: 1px solid #f3f4f6;">
+                    <td style="padding: 4px 0; color: #6b7280; font-weight: 500;">Kadastr raqami:</td>
+                    <td style="padding: 4px 0 4px 8px; color: #111827; text-align: right; font-family: monospace;">${props.cadastralNumber}</td>
+                  </tr>` : ''}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        layer.bindPopup(popupContent, {
+          maxWidth: 300,
+          className: 'real-estate-popup'
+        });
+        
+        layer.on({
+          mouseover: (e: any) => {
+            e.target.setStyle({ weight: 3, fillOpacity: 0.6 });
+            e.target.bringToFront();
+          },
+          mouseout: (e: any) => {
+            realEstateLayer.resetStyle(e.target);
+          },
+          click: (e: any) => {
+             // Ensure popup opens on click
+             e.target.openPopup();
+          }
+        });
+      },
+    });
+
+    realEstateData.forEach((item) => {
+      const feature = {
+        type: 'Feature' as const,
+        properties: {
+          id: item.id,
+          owner: item.owner,
+          address: item.address,
+          type: item.type,
+          cadastralNumber: item.cadastralNumber,
+        },
+        geometry: item.geometry,
+      };
+      realEstateLayer.addData(feature as any);
+    });
+
+    realEstateLayer.addTo(map);
+    layersRef.current.realEstate = realEstateLayer;
+    
+    // Fit bounds if we have data
+    if (realEstateData.length > 0) {
+      try {
+         map.fitBounds(realEstateLayer.getBounds());
+      } catch (e) {
+        console.warn('Could not fit bounds to real estate layer', e);
+      }
+    }
+  };
+
   const clearLayers = (map: LeafletMap) => {
     if (layersRef.current.districts) {
       layersRef.current.districts.eachLayer((layer: LayerWithLabel) => {
@@ -672,9 +794,13 @@ export function useMapLayers() {
       map.removeLayer(layersRef.current.streets);
       layersRef.current.streets = null;
     }
+    if (layersRef.current.realEstate) {
+      map.removeLayer(layersRef.current.realEstate);
+      layersRef.current.realEstate = null;
+    }
   };
 
-  const getLayer = (type: 'regions' | 'districts' | 'mahallas' | 'streets') => {
+  const getLayer = (type: 'regions' | 'districts' | 'mahallas' | 'streets' | 'realEstate') => {
     return layersRef.current[type];
   };
 
@@ -776,6 +902,7 @@ export function useMapLayers() {
     loadDistrictsLayer,
     loadMahallasLayer,
     loadStreetsLayer,
+    loadRealEstateLayer,
     clearLayers,
     getLayer,
     refreshLabels,
