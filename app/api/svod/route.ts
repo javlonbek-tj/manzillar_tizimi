@@ -25,77 +25,89 @@ export async function GET() {
       },
     });
 
-    // For each region and district, get counts
-    const svodData = await Promise.all(
-      regions.map(async (region) => {
-        // Get region-level stats
-        const [regionMahallaCount, regionStreetCount, regionRealEstateCount] =
-          await Promise.all([
-            prisma.mahalla.count({
-              where: {
-                district: {
-                  regionId: region.id,
-                },
-              },
-            }),
-            prisma.street.count({
-              where: {
-                district: {
-                  regionId: region.id,
-                },
-              },
-            }),
-            prisma.realEState.count({
-              where: {
-                district: {
-                  regionId: region.id,
-                },
-              },
-            }),
-          ]);
+    // Fetch all counts in parallel using groupBy for better performance
+    const [mahallaCountsByDistrict, streetCountsByDistrict, realEstateCountsByDistrict] =
+      await Promise.all([
+        // Group mahalla counts by district
+        prisma.mahalla.groupBy({
+          by: ['districtId'],
+          _count: {
+            id: true,
+          },
+        }),
+        // Group street counts by district
+        prisma.street.groupBy({
+          by: ['districtId'],
+          _count: {
+            id: true,
+          },
+        }),
+        // Group real estate counts by district
+        prisma.realEState.groupBy({
+          by: ['districtId'],
+          _count: {
+            id: true,
+          },
+          where: {
+            districtId: {
+              not: null,
+            },
+          },
+        }),
+      ]);
 
-        // Get district-level stats
-        const districts = await Promise.all(
-          region.districts.map(async (district) => {
-            const [mahallaCount, streetCount, realEstateCount] =
-              await Promise.all([
-                prisma.mahalla.count({
-                  where: { districtId: district.id },
-                }),
-                prisma.street.count({
-                  where: { districtId: district.id },
-                }),
-                prisma.realEState.count({
-                  where: { districtId: district.id },
-                }),
-              ]);
+    // Create lookup maps for O(1) access
+    const mahallaCountMap = new Map(
+      mahallaCountsByDistrict.map((item) => [item.districtId, item._count.id])
+    );
+    const streetCountMap = new Map(
+      streetCountsByDistrict.map((item) => [item.districtId, item._count.id])
+    );
+    const realEstateCountMap = new Map(
+      realEstateCountsByDistrict.map((item) => [item.districtId!, item._count.id])
+    );
 
-            return {
-              id: district.id,
-              nameUz: district.nameUz,
-              code: district.code,
-              stats: {
-                mahallaCount,
-                streetCount,
-                realEstateCount,
-              },
-            };
-          })
-        );
+    // Build the response data structure
+    const svodData = regions.map((region) => {
+      // Calculate region-level stats by summing district counts
+      let regionMahallaCount = 0;
+      let regionStreetCount = 0;
+      let regionRealEstateCount = 0;
+
+      const districts = region.districts.map((district) => {
+        const mahallaCount = mahallaCountMap.get(district.id) || 0;
+        const streetCount = streetCountMap.get(district.id) || 0;
+        const realEstateCount = realEstateCountMap.get(district.id) || 0;
+
+        // Add to region totals
+        regionMahallaCount += mahallaCount;
+        regionStreetCount += streetCount;
+        regionRealEstateCount += realEstateCount;
 
         return {
-          id: region.id,
-          nameUz: region.nameUz,
-          code: region.code,
+          id: district.id,
+          nameUz: district.nameUz,
+          code: district.code,
           stats: {
-            mahallaCount: regionMahallaCount,
-            streetCount: regionStreetCount,
-            realEstateCount: regionRealEstateCount,
+            mahallaCount,
+            streetCount,
+            realEstateCount,
           },
-          districts,
         };
-      })
-    );
+      });
+
+      return {
+        id: region.id,
+        nameUz: region.nameUz,
+        code: region.code,
+        stats: {
+          mahallaCount: regionMahallaCount,
+          streetCount: regionStreetCount,
+          realEstateCount: regionRealEstateCount,
+        },
+        districts,
+      };
+    });
 
     return NextResponse.json({ regions: svodData });
   } catch (error) {
@@ -106,3 +118,4 @@ export async function GET() {
     );
   }
 }
+

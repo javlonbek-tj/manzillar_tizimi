@@ -57,8 +57,27 @@ export type DashboardData = {
   districts: District[];
   mahallas: Mahalla[];
   streets: Street[];
+  addresses: Address[];
 };
 
-export type TabType = 'regions' | 'districts' | 'mahallas' | 'streets';
+export type Address = {
+  id: string;
+  regionId: string | null;
+  regionName: string | null;
+  districtId: string | null;
+  districtName: string | null;
+  mahallaId: string | null;
+  mahallaName: string | null;
+  streetId: string | null;
+  streetName: string | null;
+  houseNumber: string | null;
+  description: string | null;
+  latitude: number;
+  longitude: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
-export type DashboardItem = Region | District | Mahalla | Street;
+export type TabType = 'regions' | 'districts' | 'mahallas' | 'streets' | 'addresses';
+
+export type DashboardItem = Region | District | Mahalla | Street | Address;

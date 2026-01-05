@@ -13,9 +13,15 @@ const tabLabels: Record<TabType, string> = {
   districts: "Tuman qo'shish",
   mahallas: "Mahalla qo'shish",
   streets: "Ko'cha qo'shish",
+  addresses: "Manzil qo'shish",
 };
 
 export function AddButton({ activeTab, onClick, darkMode }: AddButtonProps) {
+  // Addresses can only be added from the map page
+  if (activeTab === 'addresses') {
+    return null;
+  }
+
   return (
     <Button
       onClick={onClick}

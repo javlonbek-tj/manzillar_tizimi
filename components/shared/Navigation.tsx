@@ -12,7 +12,7 @@ export function Navigation() {
 
   const navItems = [
     { href: '/', label: 'Ochiq xarita', icon: Map },
-    { href: '/dashboard', label: 'Dashboard', icon: BarChart3 },
+    { href: '/dashboard/svod', label: 'Dashboard', icon: BarChart3 },
     { href: '/profile', label: 'Javlon', icon: User },
   ];
 

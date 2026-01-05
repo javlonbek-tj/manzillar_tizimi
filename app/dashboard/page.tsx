@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { DashboardWrapper } from '@/components/dashboard/DashboardWrapper';
 
 async function getDashboardData() {
-  const [regions, districts, mahallas, streets] = await Promise.all([
+  const [regions, districts, mahallas, streets, addresses] = await Promise.all([
     prisma.region.findMany({
       select: { id: true, nameUz: true, nameRu: true, code: true },
       orderBy: { nameUz: 'asc' },
@@ -61,9 +61,29 @@ async function getDashboardData() {
       },
       orderBy: { nameUz: 'asc' },
     }),
+    prisma.address.findMany({
+      select: {
+        id: true,
+        regionId: true,
+        regionName: true,
+        districtId: true,
+        districtName: true,
+        mahallaId: true,
+        mahallaName: true,
+        streetId: true,
+        streetName: true,
+        houseNumber: true,
+        description: true,
+        latitude: true,
+        longitude: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
   ]);
 
-  return { regions, districts, mahallas, streets };
+  return { regions, districts, mahallas, streets, addresses };
 }
 
 export default async function DashboardPage() {

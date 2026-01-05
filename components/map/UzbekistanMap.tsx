@@ -10,7 +10,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 
 import { useLeafletMap } from '@/hooks/useLeafletMap';
 import { useMapData } from '@/hooks/useMapData';
-import { fetchStreetsByDistrict, fetchStreetsByRegion, fetchRealEstateByRegion, fetchRealEstateByDistrict, fetchRealEstateByMahalla } from '@/services/api';
+import {
+  fetchStreetsByDistrict,
+  fetchStreetsByRegion,
+  fetchRealEstateByRegion,
+  fetchRealEstateByDistrict,
+  fetchRealEstateByMahalla,
+} from '@/services/api';
 import { useMapLayers } from '@/hooks/useMapLayers';
 import { useDynamicStats } from '@/hooks/useDynamicStats';
 
@@ -20,6 +26,8 @@ import { StatsPanel } from './StatsPanel';
 import { Legend } from './Legend';
 import { ResetViewButton } from './ResetViewButton';
 import { Sidebar } from '@/components/sidebar/Sidebar';
+import { AddAddressModal } from './AddAddressModal';
+import { cn } from '@/lib/utils';
 
 type SidebarLevel = 'regions' | 'districts' | 'mahallas';
 
@@ -56,6 +64,7 @@ const UzbekistanMap = () => {
     loadMahallasLayer,
     loadStreetsLayer,
     loadRealEstateLayer,
+    handleRealEstateLabels,
     clearLayers,
     getLayer,
     refreshLabels,
@@ -70,12 +79,22 @@ const UzbekistanMap = () => {
 
   const [mapReady, setMapReady] = useState(false);
   const [regionsLayerLoaded, setRegionsLayerLoaded] = useState(false);
+  const [addAddressModalOpen, setAddAddressModalOpen] = useState(false);
+  const [clickedLat, setClickedLat] = useState<number | null>(null);
+  const [clickedLng, setClickedLng] = useState<number | null>(null);
+  const [isAddingAddress, setIsAddingAddress] = useState(false);
 
   const { changeBaseMap: changeBaseMapInternal } = useLeafletMap(
     mapRef,
     async (map) => {
       mapInstanceRef.current = map;
       setMapReady(true);
+
+      // Add event listeners for zoom and move to update real estate labels
+      const L = (await import('leaflet')).default;
+      map.on('zoomend moveend', () => {
+        handleRealEstateLabels(map, L as any);
+      });
     }
   );
 
@@ -103,6 +122,40 @@ const UzbekistanMap = () => {
       refreshLabels(map);
     }
   }, [theme, mapReady, baseMap, changeBaseMapInternal, refreshLabels]);
+
+  // Handle map click for adding address
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+
+    const onMapClick = (e: any) => {
+      if (isAddingAddress) {
+        console.log('Map clicked at:', e.latlng, 'Opening modal...');
+        setClickedLat(e.latlng.lat);
+        setClickedLng(e.latlng.lng);
+        setAddAddressModalOpen(true);
+        setIsAddingAddress(false);
+      }
+    };
+
+    map.on('click', onMapClick);
+    return () => {
+      map.off('click', onMapClick);
+    };
+  }, [isAddingAddress]);
+
+  // Handle map cursor style
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    
+    const container = map.getContainer();
+    if (isAddingAddress) {
+      container.style.cursor = 'crosshair';
+    } else {
+      container.style.cursor = '';
+    }
+  }, [isAddingAddress]);
 
   const handleDistrictClick = useCallback(
     async (districtId: string) => {
@@ -151,9 +204,13 @@ const UzbekistanMap = () => {
       try {
         const realEstates = await fetchRealEstateByDistrict(districtId);
         // eslint-disable-next-line no-console
-        console.log('RealEstate fetched for district:', districtId, realEstates?.length);
+        console.log(
+          'RealEstate fetched for district:',
+          districtId,
+          realEstates?.length
+        );
         if (realEstates && Array.isArray(realEstates)) {
-           await loadRealEstateLayer(map, L as any, realEstates);
+          await loadRealEstateLayer(map, L as any, realEstates);
         }
       } catch (err) {
         console.error('Failed to load real estate for district', err);
@@ -177,7 +234,14 @@ const UzbekistanMap = () => {
         console.error('Failed to load streets for district', err);
       }
     },
-    [districts, getLayer, loadMahallas, loadMahallasLayer, loadStreetsLayer, loadRealEstateLayer]
+    [
+      districts,
+      getLayer,
+      loadMahallas,
+      loadMahallasLayer,
+      loadStreetsLayer,
+      loadRealEstateLayer,
+    ]
   );
 
   const handleRegionClick = useCallback(
@@ -224,8 +288,6 @@ const UzbekistanMap = () => {
       const districtsData = await loadDistricts(regionId);
       await loadDistrictsLayer(map, L, districtsData, handleDistrictClick);
 
-
-
       // also load streets for the whole region (streets of districts in this region)
       try {
         const streets = await fetchStreetsByRegion(regionId);
@@ -244,7 +306,15 @@ const UzbekistanMap = () => {
         console.error('Failed to load streets for region', err);
       }
     },
-    [regions, getLayer, loadDistricts, loadDistrictsLayer, handleDistrictClick, loadStreetsLayer, loadRealEstateLayer]
+    [
+      regions,
+      getLayer,
+      loadDistricts,
+      loadDistrictsLayer,
+      handleDistrictClick,
+      loadStreetsLayer,
+      loadRealEstateLayer,
+    ]
   );
 
   // Load regions layer when both map and regions data are ready
@@ -274,12 +344,45 @@ const UzbekistanMap = () => {
   ]);
 
   const handleMahallaClick = useCallback(
-    async (mahalla: MahallaData) => {
+    async (mahalla: MahallaData, latlng?: { lat: number; lng: number }) => {
+      if (isAddingAddress && latlng) {
+        setClickedLat(latlng.lat);
+        setClickedLng(latlng.lng);
+        setAddAddressModalOpen(true);
+        setIsAddingAddress(false);
+        return;
+      }
+
       setSelectedMahalla(mahalla);
       const map = mapInstanceRef.current;
       const L = (await import('leaflet')).default as unknown as Parameters<
-         typeof loadRealEstateLayer
-       >[1];
+        typeof loadRealEstateLayer
+      >[1];
+
+      // Set coordinates for address modal based on mahalla center or clicked location
+      if (mahalla.center) {
+        setClickedLat(mahalla.center.lat);
+        setClickedLng(mahalla.center.lng);
+      } else {
+        // If no center, try to get it from the layer bounds
+        if (map && getLayer('mahallas')) {
+          getLayer('mahallas')?.eachLayer((layer) => {
+            const layerWithFeature = layer as {
+              feature?: { properties?: { id?: string } };
+              getBounds?: () => import('leaflet').LatLngBounds;
+            };
+            if (
+              layerWithFeature.feature?.properties?.id === mahalla.id &&
+              layerWithFeature.getBounds
+            ) {
+              const bounds = layerWithFeature.getBounds();
+              const center = bounds.getCenter();
+              setClickedLat(center.lat);
+              setClickedLng(center.lng);
+            }
+          });
+        }
+      }
 
       if (map && getLayer('mahallas')) {
         getLayer('mahallas')?.eachLayer((layer) => {
@@ -291,20 +394,21 @@ const UzbekistanMap = () => {
             layerWithFeature.feature?.properties?.id === mahalla.id &&
             layerWithFeature.getBounds
           ) {
-            /* 
-             * Removed fitBounds to prevent auto-zooming. 
+            /*
+             * Removed fitBounds to prevent auto-zooming.
              * User wants to stay at current zoom level when clicking mahalla.
              */
-             // const bounds = layerWithFeature.getBounds();
-             // if (bounds) {
-             //   map.fitBounds(bounds, {
-             //     padding: [50, 50],
-             //     maxZoom: 19,
-             //   });
-             // }
+            // const bounds = layerWithFeature.getBounds();
+            // if (bounds) {
+            //   map.fitBounds(bounds, {
+            //     padding: [50, 50],
+            //     maxZoom: 19,
+            //   });
+            // }
           }
         });
 
+        // Dynamic labels now handle themselves via zoomend/moveend listeners
       }
     },
     [setSelectedMahalla, getLayer]
@@ -332,14 +436,17 @@ const UzbekistanMap = () => {
         map.removeLayer(getLayer('streets')!);
       }
       if (getLayer('realEstate')) {
-        map.removeLayer(getLayer('realEstate')!);
+        const reLayer = getLayer('realEstate') as any;
+        reLayer.eachLayer((layer: any) => {
+          if (layer.label) map.removeLayer(layer.label);
+        });
+        map.removeLayer(reLayer);
       }
-
 
       setSelectedMahalla(null);
       setSelectedDistrict(null);
       setSidebarLevel('districts');
-      
+
       // Reload districts layer for the selected region
       const districtsData = await loadDistricts(selectedRegion.id);
       await loadDistrictsLayer(map, L, districtsData, handleDistrictClick);
@@ -354,7 +461,6 @@ const UzbekistanMap = () => {
         console.error('Failed to load streets for region', err);
       }
 
-
       return;
     }
 
@@ -365,7 +471,7 @@ const UzbekistanMap = () => {
       setSelectedDistrict(null);
       setSelectedMahalla(null);
       setSidebarLevel('regions');
-      
+
       map.setView([41.377491, 64.585262], 6);
       if (regions.length > 0) {
         await loadRegionsLayer(map, L as any, regions, handleRegionClick);
@@ -492,6 +598,47 @@ const UzbekistanMap = () => {
 
       <ResetViewButton onReset={resetView} />
 
+      {/* Add Address Button - Only show when mahalla is selected */}
+      {selectedMahalla && (
+        <div className='bottom-4 left-4 z-[1000] absolute'>
+          <button
+            onClick={() => {
+              setIsAddingAddress(!isAddingAddress);
+            }}
+            className={cn(
+              'flex items-center gap-2 shadow-lg px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200',
+              isAddingAddress
+                ? 'bg-green-600 hover:bg-green-700 text-white scale-105 ring-4 ring-green-600/20'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+            )}
+          >
+            {isAddingAddress ? (
+              <svg
+                className='w-4 h-4 animate-pulse'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+              >
+                <circle cx='12' cy='12' r='10' />
+                <path d='M12 8v8M8 12h8' />
+              </svg>
+            ) : (
+              <svg
+                className='w-4 h-4'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+              >
+                <path d='M12 5v14M5 12h14' />
+              </svg>
+            )}
+            {isAddingAddress ? "Xaritani tanlang..." : "Manzil qo'shish"}
+          </button>
+        </div>
+      )}
+
       <StatsPanel
         stats={stats}
         selectedRegion={selectedRegion}
@@ -501,6 +648,22 @@ const UzbekistanMap = () => {
       />
 
       <Legend />
+
+      <AddAddressModal
+        open={addAddressModalOpen}
+        onOpenChange={setAddAddressModalOpen}
+        latitude={clickedLat}
+        longitude={clickedLng}
+        mahallaId={selectedMahalla?.code}
+        mahallaName={selectedMahalla?.nameUz}
+        districtId={selectedDistrict?.id}
+        districtName={selectedDistrict?.nameUz}
+        regionId={selectedRegion?.id}
+        regionName={selectedRegion?.nameUz}
+        onSuccess={() => {
+          // Optionally refresh data or show success message
+        }}
+      />
     </div>
   );
 };

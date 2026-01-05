@@ -117,15 +117,27 @@ export function DashboardContent({
   };
 
   const handleAddClick = () => {
+    // Addresses can only be added from the map page
+    if (activeTab === 'addresses') {
+      return;
+    }
     setAddDialogOpen(true);
   };
 
   const handleEdit = (item: DashboardItem) => {
+    // Addresses cannot be edited from dashboard
+    if (activeTab === 'addresses') {
+      return;
+    }
     setSelectedItem(item);
     setEditDialogOpen(true);
   };
 
   const handleDelete = (item: DashboardItem) => {
+    // Addresses cannot be deleted from dashboard
+    if (activeTab === 'addresses') {
+      return;
+    }
     setItemToDelete(item);
     setDeleteDialogOpen(true);
   };

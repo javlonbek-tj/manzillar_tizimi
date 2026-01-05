@@ -38,7 +38,7 @@ async function main() {
     process.cwd(),
     'prisma',
     'data',
-    'Sirdaryo_vil_dkyat.geojson'
+    'Sirdaryo_DKYAT.geojson'
   );
 
   if (!fs.existsSync(filePath)) {
@@ -76,7 +76,7 @@ async function main() {
           address: props.MANZIL,
           districtName: props.TUMAN,
           streetName: props.KOCHA,
-          houseNumber: String(props.UY_RAQAM),
+          houseNumber: props.HouseNo || String(props.UY_RAQAM),
           ownership: props.HUQUQ,
           ownershipType: props.HUJJAT,
           ownershipNumber: String(props.HUJ_RAQAM),

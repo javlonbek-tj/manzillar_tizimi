@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SvodRegion } from '@/types/map';
@@ -31,34 +31,46 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className={cn(
-          darkMode ? "bg-blue-900" : "bg-blue-800"
+          darkMode ? "bg-gray-600" : "bg-gray-200"
         )}>
           <tr>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Viloyatlar
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Mahallalar
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Ko&apos;chalar
-            </th>
-            <th
-              scope="col"
-              className="px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
-            >
-              Ko&apos;chmas mulklar
-            </th>
-          </tr>
+  <th
+    scope="col"
+    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+      darkMode ? 'text-white' : 'text-gray-900'
+    }`}
+  >
+    Viloyatlar
+  </th>
+
+  <th
+    scope="col"
+    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+      darkMode ? 'text-white' : 'text-gray-900'
+    }`}
+  >
+    Mahallalar
+  </th>
+
+  <th
+    scope="col"
+    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+      darkMode ? 'text-white' : 'text-gray-900'
+    }`}
+  >
+    Ko&apos;chalar
+  </th>
+
+  <th
+    scope="col"
+    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
+      darkMode ? 'text-white' : 'text-gray-900'
+    }`}
+  >
+    Ko&apos;chmas mulklar
+  </th>
+</tr>
+
         </thead>
         <tbody className={cn(
           "divide-y",
@@ -69,10 +81,9 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
             const isEven = regionIndex % 2 === 0;
 
             return (
-              <>
+              <Fragment key={region.id}>
                 {/* Region Row */}
                 <tr
-                  key={region.id}
                   className={cn(
                     "cursor-pointer transition-colors",
                     darkMode
@@ -162,7 +173,7 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
                       </td>
                     </tr>
                   ))}
-              </>
+              </Fragment>
             );
           })}
         </tbody>

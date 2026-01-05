@@ -1,6 +1,6 @@
 import { Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { DashboardItem, TabType } from "@/types/dashboard";
+import type { DashboardItem, TabType, Address } from "@/types/dashboard";
 import type { Mahalla, Street } from "@/types/dashboard";
 
 interface DashboardTableProps {
@@ -42,7 +42,59 @@ export function DashboardTable({
               T/R
             </th>
 
-            {activeTab === "mahallas" ? (
+            {activeTab === "addresses" ? (
+              <>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Hudud
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Tuman
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Mahalla
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Ko'cha
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Uy raqami
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Koordinatalar
+                </th>
+                <th
+                  className={`px-6 py-3 text-left text-xs ${
+                    darkMode ? "text-gray-300" : "text-gray-700"
+                  } uppercase tracking-wider`}
+                >
+                  Qo'shimcha ma'lumot
+                </th>
+              </>
+            ) : activeTab === "mahallas" ? (
               <>
                 <th
                   className={`px-6 py-3 text-left text-xs ${
@@ -183,7 +235,7 @@ export function DashboardTable({
             <tr>
               <td
                 colSpan={
-                  activeTab === "mahallas" ? 9 : activeTab === "streets" ? 9 : 4
+                  activeTab === "addresses" ? 9 : activeTab === "mahallas" ? 9 : activeTab === "streets" ? 9 : 4
                 }
                 className="px-6 py-12 text-center"
               >
@@ -221,7 +273,59 @@ export function DashboardTable({
                     {(currentPage - 1) * itemsPerPage + index + 1}
                   </td>
 
-                  {activeTab === "mahallas" ? (
+                  {activeTab === "addresses" ? (
+                    <>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {(item as Address).regionName || "—"}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {(item as Address).districtName || "—"}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {(item as Address).mahallaName || "—"}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {(item as Address).streetName || "—"}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {(item as Address).houseNumber || "—"}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        {(item as Address).latitude.toFixed(6)}, {(item as Address).longitude.toFixed(6)}
+                      </td>
+                      <td
+                        className={`px-6 py-3 text-sm ${
+                          darkMode ? "text-white" : "text-gray-900"
+                        }`}
+                      >
+                        {(item as Address).description || "—"}
+                      </td>
+                    </>
+                  ) : activeTab === "mahallas" ? (
                     <>
                       <td
                         className={`px-6 py-3 text-sm ${
@@ -344,30 +448,36 @@ export function DashboardTable({
                     </>
                   )}
                   <td className="px-6 py-3 whitespace-nowrap text-center">
-                    <div className="flex items-center justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => onEdit(item)}
-                        className={
-                          darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                        }
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        onClick={() => onDelete(item)}
-                        className={`${
-                          darkMode
-                            ? "hover:bg-red-900/20 text-red-400"
-                            : "hover:bg-red-50 text-red-600"
-                        }`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                    {activeTab === "addresses" ? (
+                      <div className="text-sm text-gray-400">
+                        Xaritadan qo'shildi
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => onEdit(item)}
+                          className={
+                            darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
+                          }
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          onClick={() => onDelete(item)}
+                          className={`${
+                            darkMode
+                              ? "hover:bg-red-900/20 text-red-400"
+                              : "hover:bg-red-50 text-red-600"
+                          }`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

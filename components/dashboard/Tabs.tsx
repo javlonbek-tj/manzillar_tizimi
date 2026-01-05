@@ -73,6 +73,13 @@ export function Tabs({
         >
           Ko'chalar
         </TabButton>
+        <TabButton
+          active={activeTab === 'addresses'}
+          onClick={() => onTabChange('addresses')}
+          darkMode={darkMode}
+        >
+          Manzillar
+        </TabButton>
         <AddButton
           activeTab={activeTab}
           onClick={onAddClick}

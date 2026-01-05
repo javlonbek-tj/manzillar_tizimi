@@ -136,3 +136,31 @@ model RealEState {
 
   @@map("real_states")
 }
+
+model Address {
+  id          String   @id @default(cuid())
+  regionId    String?
+  regionName  String?
+  districtId  String?
+  districtName String?
+  mahallaId   String?
+  mahallaName String?
+  streetId    String?
+  streetName  String?
+  houseNumber String?
+  description String?
+  
+  latitude    Float
+  longitude   Float
+  geometry    Json?
+  center      Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([regionId])
+  @@index([districtId])
+  @@index([mahallaId])
+  @@index([streetId])
+  @@map("addresses")
+}

@@ -42,16 +42,39 @@ export function useDashboardData(
           filtered = filtered.filter((s) => s.districtId === selectedDistrict);
         }
         break;
+      case 'addresses':
+        filtered = data.addresses;
+        if (selectedRegion) {
+          filtered = filtered.filter(
+            (a) => a.regionId === selectedRegion
+          );
+        }
+        if (selectedDistrict) {
+          filtered = filtered.filter((a) => a.districtId === selectedDistrict);
+        }
+        break;
     }
 
     if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
+      filtered = filtered.filter((item) => {
+        if (activeTab === 'addresses') {
+          const addr = item as any;
+          return (
+            (addr.regionName && addr.regionName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (addr.districtName && addr.districtName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (addr.mahallaName && addr.mahallaName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (addr.streetName && addr.streetName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (addr.houseNumber && addr.houseNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (addr.description && addr.description.toLowerCase().includes(searchTerm.toLowerCase()))
+          );
+        }
+        return (
           item.nameUz.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (item.nameRu &&
             item.nameRu.toLowerCase().includes(searchTerm.toLowerCase())) ||
           item.code.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+        );
+      });
     }
 
     return filtered;

@@ -238,7 +238,7 @@ export function useMapLayers() {
     map: LeafletMap,
     L: LeafletType,
     mahallasData: MahallaData[],
-    onMahallaClick?: (mahalla: MahallaData) => Promise<void>
+    onMahallaClick?: (mahalla: MahallaData, latlng?: { lat: number; lng: number }) => Promise<void>
   ) => {
     if (layersRef.current.districts) {
       layersRef.current.districts.eachLayer((layer: LayerWithLabel) => {
@@ -311,7 +311,7 @@ export function useMapLayers() {
                   geometry: feature.geometry,
                   districtId: feature.properties.districtId, // ensure districtId is passed if available
                } as MahallaData;
-               await onMahallaClick(mData);
+               await onMahallaClick(mData, e.latlng);
             }
 
             // prevent any bound popup from opening
@@ -522,10 +522,14 @@ export function useMapLayers() {
         }
         // Ensure streets are interactive
         layer.on('mouseover', () => {
-          layer.setStyle({ weight: 5, opacity: 1 });
+          if (layer.setStyle) {
+            layer.setStyle({ weight: 5, opacity: 1 });
+          }
         });
         layer.on('mouseout', () => {
-          layer.setStyle({ weight: 3, opacity: 1 });
+          if (layer.setStyle) {
+            layer.setStyle({ weight: 3, opacity: 1 });
+          }
         });
         // Click to select a street: show permanent label and change style
         layer.on('click', () => {
@@ -570,7 +574,9 @@ export function useMapLayers() {
 
             // set new selection
             selectedStreetRef.current = layer;
-            layer.setStyle({ color: '#06b6d4', weight: 6 });
+            if (layer.setStyle) {
+              layer.setStyle({ color: '#06b6d4', weight: 6 });
+            }
 
             // bind a permanent tooltip label for the selected street
             if (name) {
@@ -678,20 +684,27 @@ export function useMapLayers() {
     realEstateData: RealEstateData[]
   ) => {
     if (layersRef.current.realEstate) {
+      // Remove existing labels
+      layersRef.current.realEstate.eachLayer((layer: LayerWithLabel) => {
+        if (layer.label) map.removeLayer(layer.label);
+      });
       map.removeLayer(layersRef.current.realEstate);
       layersRef.current.realEstate = null;
     }
 
     const realEstateLayer = L.geoJSON(undefined, {
       style: {
-        fillColor: '#8b5cf6', // Violet
-        weight: 1,
+        fillColor: '#f8c850ff', // Amber
+        weight: 2,
         opacity: 1,
-        color: '#7c3aed',
-        fillOpacity: 0.4,
+        color: '#8f6f4cff', // Border Amber
+        fillOpacity: 0.5,
       },
       onEachFeature: (feature: any, layer: LayerWithLabel) => {
         const props = feature.properties;
+        
+        // Removed: automatic house number label creation here to prevent performance issues/crashes.
+        // Labels are now created on-demand for the selected mahalla only.
         
         // Improved popup styling
         const popupContent = `
@@ -701,8 +714,13 @@ export function useMapLayers() {
             </h3>
             <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
               <tbody>
-                ${props.owner ? `
+                ${props.houseNumber ? `
                   <tr>
+                    <td style="padding: 4px 0; color: #6b7280; font-weight: 500;">Uy raqami:</td>
+                    <td style="padding: 4px 0 4px 8px; color: #111827; text-align: right; font-weight: 600;">${props.houseNumber}</td>
+                  </tr>` : ''}
+                ${props.owner ? `
+                  <tr style="border-top: 1px solid #f3f4f6;">
                     <td style="padding: 4px 0; color: #6b7280; font-weight: 500;">Egalik qiluvchi:</td>
                     <td style="padding: 4px 0 4px 8px; color: #111827; text-align: right;">${props.owner}</td>
                   </tr>` : ''}
@@ -756,6 +774,8 @@ export function useMapLayers() {
           address: item.address,
           type: item.type,
           cadastralNumber: item.cadastralNumber,
+          houseNumber: item.houseNumber,
+          center: item.center,
         },
         geometry: item.geometry,
       };
@@ -795,6 +815,9 @@ export function useMapLayers() {
       layersRef.current.streets = null;
     }
     if (layersRef.current.realEstate) {
+      layersRef.current.realEstate.eachLayer((layer: LayerWithLabel) => {
+        if (layer.label) map.removeLayer(layer.label);
+      });
       map.removeLayer(layersRef.current.realEstate);
       layersRef.current.realEstate = null;
     }
@@ -894,6 +917,105 @@ export function useMapLayers() {
         );
       }
     }
+
+    // Update real estate labels
+    if (layersRef.current.realEstate) {
+      layersRef.current.realEstate.eachLayer((layer: LayerWithLabel) => {
+        if (!layer.label) return;
+        const element = layer.label.getElement();
+        if (!element) return;
+        const div = element.querySelector('div');
+        if (!div) return;
+
+        div.style.color = isDark ? 'white' : '#1f2937';
+        div.style.background = isDark
+          ? 'rgba(217, 119, 6, 0.8)' // Amber-600
+          : 'rgba(251, 191, 36, 0.9)'; // Amber-400
+        div.style.textShadow = isDark
+          ? '1px 1px 2px rgba(0,0,0,0.8)'
+          : '1px 1px 2px rgba(0,0,0,0.2)';
+        div.style.boxShadow = `0 1px 3px ${
+          isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
+        }`;
+        div.style.border = `1px solid ${
+          isDark ? 'rgba(180, 83, 9, 0.6)' : 'rgba(180, 83, 9, 0.4)'
+        }`;
+      });
+    }
+  };
+
+  const handleRealEstateLabels = (
+    map: LeafletMap,
+    L: LeafletType
+  ) => {
+    if (!layersRef.current.realEstate) return;
+
+    const zoom = map.getZoom();
+    const threshold = 17; // Only show house numbers when zoomed in close enough
+    const bounds = map.getBounds();
+    const isDark = document.documentElement.classList.contains('dark');
+
+    layersRef.current.realEstate.eachLayer((layer: LayerWithLabel) => {
+      const feature = (layer as any).feature;
+      if (!feature) return;
+
+      const props = feature.properties;
+      
+      // If zoomed out or no house number, remove existing label and return
+      if (zoom < threshold || !props.houseNumber) {
+        if (layer.label) {
+          map.removeLayer(layer.label);
+          layer.label = null;
+        }
+        return;
+      }
+
+      // Check if feature is within current map viewport to avoid over-rendering
+      const center = props.center || layer.getBounds?.().getCenter();
+      if (!center) return;
+
+      const centerCoords = center.coordinates
+        ? [center.coordinates[1], center.coordinates[0]]
+        : [center.lat, center.lng];
+      
+      const latlng = { lat: centerCoords[0], lng: centerCoords[1] };
+
+      if (bounds.contains(latlng as any)) {
+        // Feature is in view, create label if not exists
+        if (!layer.label) {
+          const label = L.marker(centerCoords as LatLngExpression, {
+            icon: L.divIcon({
+              className: 'real-estate-label',
+              html: `<div style="
+                color: ${isDark ? 'white' : '#1f2937'};
+                background: ${isDark ? 'rgba(217, 119, 6, 0.8)' : 'rgba(251, 191, 36, 0.9)'};
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 11px;
+                text-shadow: ${isDark ? '1px 1px 2px rgba(0,0,0,0.8)' : '1px 1px 2px rgba(0,0,0,0.2)'};
+                box-shadow: 0 1px 3px ${isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'};
+                white-space: nowrap;
+                pointer-events: none;
+                text-align: center;
+                display: inline-block;
+                border: 1px solid ${isDark ? 'rgba(180, 83, 9, 0.6)' : 'rgba(180, 83, 9, 0.4)'};
+              ">${props.houseNumber}</div>`,
+              iconSize: [40, 20],
+            }),
+            interactive: false,
+          }).addTo(map);
+
+          layer.label = label;
+        }
+      } else {
+        // Feature is out of view, remove label to save performance
+        if (layer.label) {
+          map.removeLayer(layer.label);
+          layer.label = null;
+        }
+      }
+    });
   };
 
   return {
@@ -903,6 +1025,7 @@ export function useMapLayers() {
     loadMahallasLayer,
     loadStreetsLayer,
     loadRealEstateLayer,
+    handleRealEstateLabels,
     clearLayers,
     getLayer,
     refreshLabels,

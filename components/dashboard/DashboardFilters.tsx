@@ -73,7 +73,7 @@ export function DashboardFilters({
         )}
 
         {/* District Select */}
-        {(activeTab === 'mahallas' || activeTab === 'streets') &&
+        {(activeTab === 'mahallas' || activeTab === 'streets' || activeTab === 'addresses') &&
           selectedRegion && (
             <select
               value={selectedDistrict}

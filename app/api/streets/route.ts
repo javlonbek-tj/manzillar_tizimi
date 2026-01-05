@@ -6,8 +6,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const districtId = searchParams.get('districtId');
     const regionId = searchParams.get('regionId');
+    const mahallaId = searchParams.get('mahallaId');
 
-    if (districtId) {
+    if (mahallaId) {
+      // Get streets for a specific mahalla (by its code)
+      const streets = await prisma.street.findMany({
+        where: {
+          mahalla: {
+            code: mahallaId,
+          },
+        },
+        select: {
+          id: true,
+          nameUz: true,
+          nameRu: true,
+          code: true,
+          type: true,
+          oldName: true,
+          districtId: true,
+          mahallaId: true,
+        },
+      });
+      return NextResponse.json(streets);
+    } else if (districtId) {
       // Get streets for a specific district
       const streets = await prisma.street.findMany({
         where: {
@@ -99,11 +120,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nameUz, nameRu, code, districtId } = body;
+    const { nameUz, nameRu, code, districtId, mahallaId, type } = body;
 
-    if (!nameUz || !code || !districtId) {
+    if (!nameUz || !code || !districtId || !mahallaId || !type) {
       return NextResponse.json(
-        { error: 'nameUz, code, and districtId are required' },
+        { error: 'nameUz, code, districtId, mahallaId, and type are required' },
         { status: 400 }
       );
     }
@@ -114,6 +135,8 @@ export async function POST(request: Request) {
         nameRu: nameRu || null,
         code,
         districtId,
+        mahallaId,
+        type,
         geometry: { type: 'LineString', coordinates: [] },
       },
     });
