@@ -21,7 +21,6 @@ interface AddDialogProps {
   regions?: Region[];
   districts?: District[];
   selectedRegion?: string;
-  darkMode: boolean;
   onSuccess: () => void;
 }
 
@@ -32,7 +31,6 @@ export function AddDialog({
   regions = [],
   districts = [],
   selectedRegion,
-  darkMode,
   onSuccess,
 }: AddDialogProps) {
   const [loading, setLoading] = useState(false);
@@ -151,11 +149,7 @@ export function AddDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`max-w-3xl ${
-          darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-        }`}
-      >
+      <DialogContent className="max-w-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
           <DialogDescription className='sr-only'>
@@ -174,7 +168,7 @@ export function AddDialog({
                   setFormData({ ...formData, nameUz: e.target.value })
                 }
                 required
-                className={darkMode ? 'bg-gray-700 text-white' : ''}
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -186,7 +180,7 @@ export function AddDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, nameRu: e.target.value })
                 }
-                className={darkMode ? 'bg-gray-700 text-white' : ''}
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -202,7 +196,7 @@ export function AddDialog({
                   setFormData({ ...formData, code: e.target.value })
                 }
                 required
-                className={darkMode ? 'bg-gray-700 text-white' : ''}
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
           ) : (
@@ -216,7 +210,7 @@ export function AddDialog({
                     setFormData({ ...formData, code: e.target.value })
                   }
                   required
-                  className={darkMode ? 'bg-gray-700 text-white' : ''}
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
@@ -233,11 +227,7 @@ export function AddDialog({
                     })
                   }
                   required
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  }`}
+                  className="w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 >
                   <option value=''>Viloyat tanlang</option>
                   {regions.map((region) => (
@@ -264,11 +254,7 @@ export function AddDialog({
                     }
                     required
                     disabled={!formData.regionId}
-                    className={`w-full px-3 py-2 rounded-md border ${
-                      darkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300 text-gray-900'
-                    } ${
+                    className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${
                       !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
@@ -291,7 +277,7 @@ export function AddDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, uzKadName: e.target.value })
                     }
-                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               </div>
@@ -305,7 +291,7 @@ export function AddDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, geoCode: e.target.value })
                     }
-                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
@@ -317,7 +303,7 @@ export function AddDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, oneId: e.target.value })
                     }
-                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               </div>
@@ -353,7 +339,7 @@ export function AddDialog({
                         })
                       }
                       placeholder='ID'
-                      className={darkMode ? 'bg-gray-700 text-white' : ''}
+                      className="dark:bg-gray-700 dark:text-white"
                     />
                   </div>
 
@@ -371,7 +357,7 @@ export function AddDialog({
                         })
                       }
                       placeholder='Nomi'
-                      className={darkMode ? 'bg-gray-700 text-white' : ''}
+                      className="dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                 </div>
@@ -391,11 +377,7 @@ export function AddDialog({
                 }
                 required
                 disabled={!formData.regionId}
-                className={`w-full px-3 py-2 rounded-md border ${
-                  darkMode
-                    ? 'bg-gray-700 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-900'
-                } ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <option value=''>Tuman tanlang</option>
                 {districts

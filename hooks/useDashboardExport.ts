@@ -17,7 +17,7 @@ export function useDashboardExport() {
 
       switch (activeTab) {
         case 'regions':
-          data = filteredData.map((item: Region, index) => ({
+          data = (filteredData as Region[]).map((item, index) => ({
             'T/R': index + 1,
             Nomi: item.nameUz,
             'Soato kodi': item.code,
@@ -25,31 +25,40 @@ export function useDashboardExport() {
           filename = 'Hududlar';
           break;
         case 'districts':
-          data = filteredData.map((item: District, index) => ({
+          data = (filteredData as District[]).map((item, index) => ({
             'T/R': index + 1,
-            Nomi: item.nameUz,
-            'Soato kodi': item.code,
+            Viloyat: item.region.nameUz,
+            'Viloyat SOATO': item.region.code,
+            'Tuman nomi': item.nameUz,
+            'Tuman SOATO': item.code,
           }));
           filename = 'Tumanlar';
           break;
         case 'mahallas':
-          data = filteredData.map((item: Mahalla, index) => ({
+          data = (filteredData as Mahalla[]).map((item, index) => ({
             'T/R': index + 1,
             Viloyat: item.district.region.nameUz,
+            'Viloyat SOATO': item.district.region.code,
             Tuman: item.district.nameUz,
-            'UzKad nomi': item.uzKadName || '—',
-            'Geonames nomi': item.nameUz,
+            'Tuman SOATO': item.district.code,
+            'Mahalla nomi': item.nameUz,
             'UzKad kodi': item.code,
+            'UzKad nomi': item.uzKadName || '—',
             'APU kodi': item.geoCode || '—',
             '1C kodi': item.oneId || '—',
           }));
           filename = 'Mahallalar';
           break;
         case 'streets':
-          data = filteredData.map((item: Street, index) => ({
+          data = (filteredData as Street[]).map((item, index) => ({
             'T/R': index + 1,
-            Nomi: item.nameUz,
-            'Soato kodi': item.code,
+            Viloyat: item.district.region.nameUz,
+            'Viloyat SOATO': item.district.region.code,
+            Tuman: item.district.nameUz,
+            'Tuman SOATO': item.district.code,
+            Mahalla: item.mahalla.nameUz,
+            'Koʻcha nomi': item.nameUz,
+            'Koʻcha kodi (SOATO)': item.code,
           }));
           filename = 'Kochalar';
           break;

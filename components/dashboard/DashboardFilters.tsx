@@ -11,7 +11,6 @@ interface DashboardFiltersProps {
   onDistrictChange: (districtId: string) => void;
   availableDistricts: District[];
   regions: Region[];
-  darkMode: boolean;
   onExport: () => void;
   isExporting: boolean;
   canExport: boolean;
@@ -29,7 +28,6 @@ export function DashboardFilters({
   onDistrictChange,
   availableDistricts,
   regions,
-  darkMode,
   onExport,
   isExporting,
   canExport,
@@ -45,11 +43,7 @@ export function DashboardFilters({
           placeholder='Qidiruv...'
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className={`flex-1 min-w-[200px] px-4 py-2 text-sm rounded-lg border ${
-            darkMode
-              ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
-              : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'
-          } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+          className="flex-1 min-w-[200px] px-4 py-2 text-sm rounded-lg border transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-400 focus:border-blue-500 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10"
         />
 
         {/* Region Select */}
@@ -57,11 +51,7 @@ export function DashboardFilters({
           <select
             value={selectedRegion}
             onChange={(e) => onRegionChange(e.target.value)}
-            className={`px-4 py-2 rounded-lg border text-sm cursor-pointer ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600 text-white'
-                : 'bg-white border-gray-300 text-gray-900'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]`}
+            className="px-4 py-2 rounded-lg border text-sm cursor-pointer transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 min-w-[200px]"
           >
             <option value=''>Hudud tanlang</option>
             {regions.map((region) => (
@@ -78,11 +68,7 @@ export function DashboardFilters({
             <select
               value={selectedDistrict}
               onChange={(e) => onDistrictChange(e.target.value)}
-              className={`px-4 py-2 rounded-lg border text-sm ${
-                darkMode
-                  ? 'bg-gray-700 border-gray-600 text-white'
-                  : 'bg-white border-gray-300 text-gray-900'
-              } focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]`}
+              className="px-4 py-2 rounded-lg border text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
             >
               <option value=''>Tuman tanlang</option>
               {availableDistricts.map((district) => (
@@ -98,11 +84,7 @@ export function DashboardFilters({
           <select
             value={selectedHidden}
             onChange={(e) => onHiddenChange(e.target.value)}
-            className={`px-4 py-2 rounded-lg border text-sm cursor-pointer ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600 text-white'
-                : 'bg-white border-gray-300 text-gray-900'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]`}
+            className="px-4 py-2 rounded-lg border text-sm cursor-pointer transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 min-w-[200px]"
           >
             <option value=''>Yashirilgan (hammas)</option>
             <option value='true'>Yashirilgan (ha)</option>
@@ -115,7 +97,6 @@ export function DashboardFilters({
           onExport={onExport}
           isExporting={isExporting}
           disabled={!canExport}
-          darkMode={darkMode}
         />
       </div>
     </div>

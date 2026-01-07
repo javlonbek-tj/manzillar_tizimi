@@ -6,7 +6,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { Sidebar } from "./Sidebar";
 import { cn } from "@/lib/utils";
 
-export function DashboardWrapper({ initialData }: { initialData: any }) {
+export function DashboardWrapper({ children }: { children: React.ReactNode }) {
   const { theme } = useTheme();
   const darkMode = theme === "dark";
 
@@ -19,7 +19,7 @@ export function DashboardWrapper({ initialData }: { initialData: any }) {
           darkMode ? "bg-gray-900" : "bg-blue-50"
         )}
       >
-        <DashboardContent initialData={initialData} darkMode={darkMode} />
+        {children}
       </main>
     </div>
   );

@@ -1,1 +1,2 @@
-export { Navigation } from './Navigation';
+export * from './Navigation';
+export * from './LoadingSpinner';

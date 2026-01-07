@@ -29,10 +29,12 @@ export async function GET(request: Request) {
           district: {
             select: {
               nameUz: true,
+              code: true,
               regionId: true,
               region: {
                 select: {
                   nameUz: true,
+                  code: true,
                 },
               },
             },
@@ -65,10 +67,12 @@ export async function GET(request: Request) {
           district: {
             select: {
               nameUz: true,
+              code: true,
               regionId: true,
               region: {
                 select: {
                   nameUz: true,
+                  code: true,
                 },
               },
             },

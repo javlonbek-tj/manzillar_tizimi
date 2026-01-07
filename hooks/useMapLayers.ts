@@ -38,10 +38,6 @@ export function useMapLayers() {
     realEstate: null,
   });
   const selectedStreetRef = useRef<any>(null);
-  const selectedMahallaRef = useRef<{ id: string | null; streets: any[] }>({
-    id: null,
-    streets: [],
-  });
 
   const loadRegionsLayer = async (
     map: LeafletMap,
@@ -140,7 +136,8 @@ export function useMapLayers() {
     map: LeafletMap,
     L: LeafletType,
     districtsData: DistrictData[],
-    onDistrictClick: (districtId: string) => Promise<void>
+    onDistrictClick: (districtId: string) => Promise<void>,
+    skipFitBounds?: boolean
   ) => {
     if (layersRef.current.regions) {
       layersRef.current.regions.eachLayer((layer: LayerWithLabel) => {
@@ -231,14 +228,17 @@ export function useMapLayers() {
 
     districtsLayer.addTo(map);
     layersRef.current.districts = districtsLayer;
-    map.fitBounds(districtsLayer.getBounds());
+    if (!skipFitBounds) {
+      map.fitBounds(districtsLayer.getBounds());
+    }
   };
 
   const loadMahallasLayer = async (
     map: LeafletMap,
     L: LeafletType,
     mahallasData: MahallaData[],
-    onMahallaClick?: (mahalla: MahallaData, latlng?: { lat: number; lng: number }) => Promise<void>
+    onMahallaClick?: (mahalla: MahallaData, latlng?: { lat: number; lng: number }) => Promise<void>,
+    skipFitBounds?: boolean
   ) => {
     if (layersRef.current.districts) {
       layersRef.current.districts.eachLayer((layer: LayerWithLabel) => {
@@ -292,8 +292,6 @@ export function useMapLayers() {
         }).addTo(map);
 
         layer.label = label;
-
-        layer.label = label;
  
         // No hover style changes for mahallas to avoid obscuring streets
 
@@ -317,83 +315,6 @@ export function useMapLayers() {
             // prevent any bound popup from opening
             layer.closePopup?.();
 
-            const streetsLayer = layersRef.current.streets as any;
-            if (!streetsLayer) return;
-
-            // Clear previous mahalla street labels (markers)
-            if (
-              selectedMahallaRef.current &&
-              selectedMahallaRef.current.streets.length
-            ) {
-              selectedMahallaRef.current.streets.forEach((item: any) => {
-                try {
-                  if (item.marker) map.removeLayer(item.marker);
-                  const sLayer = item.layer || item;
-                  if (
-                    selectedStreetRef.current &&
-                    selectedStreetRef.current === sLayer
-                  )
-                    return;
-                  if (sLayer.getTooltip?.()) sLayer.unbindTooltip();
-                  (streetsLayer as any).resetStyle(sLayer);
-                } catch (err) {
-                  // eslint-disable-next-line no-console
-                  console.warn('clear mahalla labels error', err);
-                }
-              });
-              selectedMahallaRef.current = { id: null, streets: [] };
-            }
-
-            const mahallaBounds = (layer as any).getBounds?.();
-            const matched: any[] = [];
-
-            streetsLayer.eachLayer((s: any) => {
-              try {
-                const sb = s.getBounds?.();
-                if (!sb) return;
-                if (mahallaBounds && mahallaBounds.intersects(sb)) {
-                  const name = s.feature?.properties?.nameUz;
-                  if (name) {
-                    // compute a midpoint along the polyline to place a label marker
-                    let latlngs: any = s.getLatLngs ? s.getLatLngs() : null;
-                    let mid: any = null;
-                    if (latlngs) {
-                      if (Array.isArray(latlngs[0])) {
-                        const part = latlngs[Math.floor(latlngs.length / 2)];
-                        mid = part[Math.floor(part.length / 2)];
-                      } else {
-                        mid = latlngs[Math.floor(latlngs.length / 2)];
-                      }
-                    }
-                    if (mid) {
-                      const marker = L.marker([mid.lat, mid.lng], {
-                        icon: L.divIcon({
-                          className: 'street-mahalla-label',
-                          html: `<div style="padding:2px 6px; border-radius:6px; background: rgba(255,255,255,0.9); color:#1f2937; font-weight:500; font-size:11px; pointer-events:none;">${name}</div>`,
-                          iconSize: [120, 20],
-                        }),
-                        interactive: false,
-                      }).addTo(map);
-                      matched.push({ layer: s, marker });
-                    } else {
-                      matched.push({ layer: s });
-                    }
-                  } else {
-                    matched.push({ layer: s });
-                  }
-                  // slightly emphasize streets inside mahalla
-                  s.setStyle?.({ weight: 4 });
-                }
-              } catch (err) {
-                // eslint-disable-next-line no-console
-                console.warn('mahalla->streets match error', err);
-              }
-            });
-
-            selectedMahallaRef.current = {
-              id: feature.properties?.id,
-              streets: matched,
-            };
           } catch (err) {
             // eslint-disable-next-line no-console
             console.warn('mahalla click handler error', err);
@@ -419,7 +340,9 @@ export function useMapLayers() {
 
     mahallasLayer.addTo(map);
     layersRef.current.mahallas = mahallasLayer;
-    map.fitBounds(mahallasLayer.getBounds());
+    if (!skipFitBounds) {
+      map.fitBounds(mahallasLayer.getBounds());
+    }
   };
 
   const loadStreetsLayer = async (
@@ -455,29 +378,6 @@ export function useMapLayers() {
           selectedStreetRef.current = null;
         }
 
-        // Clear any mahalla-bound street labels (may contain marker + layer)
-        if (
-          selectedMahallaRef.current &&
-          selectedMahallaRef.current.streets.length
-        ) {
-          selectedMahallaRef.current.streets.forEach((item: any) => {
-            try {
-              const sLayer = item.layer || item;
-              if (item.marker) map.removeLayer(item.marker);
-              if (sLayer && selectedStreetRef.current !== sLayer) {
-                if (sLayer.getTooltip?.()) sLayer.unbindTooltip();
-                (layersRef.current.streets as any).resetStyle(sLayer);
-              }
-            } catch (err) {
-              // eslint-disable-next-line no-console
-              console.warn(
-                'clearLayers: failed to clear mahalla street label',
-                err
-              );
-            }
-          });
-          selectedMahallaRef.current = { id: null, streets: [] };
-        }
       } catch (err) {
         // eslint-disable-next-line no-console
         console.warn(
@@ -891,8 +791,7 @@ export function useMapLayers() {
             el.style.fontWeight = '600';
             el.style.whiteSpace = 'nowrap';
           }
-          if (el.classList.contains('street-mahalla-label')) {
-            // the label content is usually a child div inside the divIcon
+          if (el.classList.contains('street-dynamic-label')) {
             const inner = el.querySelector('div');
             if (inner) {
               inner.style.color = isDark ? 'white' : '#1f2937';
@@ -1018,6 +917,93 @@ export function useMapLayers() {
     });
   };
 
+  const handleStreetLabels = (
+    map: LeafletMap,
+    L: LeafletType
+  ) => {
+    if (!layersRef.current.streets) return;
+
+    const zoom = map.getZoom();
+    const threshold = 15; // Show street names when zoomed in enough
+    const bounds = map.getBounds();
+    const isDark = document.documentElement.classList.contains('dark');
+
+    layersRef.current.streets.eachLayer((layer: any) => {
+      const feature = layer.feature;
+      if (!feature) return;
+
+      const props = feature.properties;
+      const name = props.nameUz;
+
+      // If zoomed out or no name, remove existing label and return
+      if (zoom < threshold || !name) {
+        if (layer.label) {
+          map.removeLayer(layer.label);
+          layer.label = null;
+        }
+        return;
+      }
+
+      // Skip if this street is already selected (it has its own tooltip)
+      if (selectedStreetRef.current === layer) {
+        if (layer.label) {
+          map.removeLayer(layer.label);
+          layer.label = null;
+        }
+        return;
+      }
+
+      // Check if feature's bounds intersect current map viewport
+      if (layer.getBounds && bounds.intersects(layer.getBounds())) {
+        if (!layer.label) {
+          // Compute midpoint for the polyline
+          let latlngs = layer.getLatLngs ? layer.getLatLngs() : null;
+          let mid: any = null;
+          if (latlngs) {
+            if (Array.isArray(latlngs[0])) {
+              const part = latlngs[Math.floor(latlngs.length / 2)];
+              mid = part[Math.floor(part.length / 2)];
+            } else {
+              mid = latlngs[Math.floor(latlngs.length / 2)];
+            }
+          }
+
+          if (mid) {
+            const label = L.marker([mid.lat, mid.lng], {
+              icon: L.divIcon({
+                className: 'street-dynamic-label',
+                html: `<div style="
+                  color: ${isDark ? 'white' : '#1f2937'};
+                  background: ${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.93)'};
+                  padding: 2px 6px;
+                  border-radius: 6px;
+                  font-weight: 500;
+                  font-size: 11px;
+                  text-shadow: ${isDark ? '1px 1px 3px rgba(0,0,0,0.8)' : 'none'};
+                  box-shadow: 0 1px 4px ${isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.08)'};
+                  white-space: nowrap;
+                  pointer-events: none;
+                  text-align: center;
+                  display: inline-block;
+                ">${name}</div>`,
+                iconSize: [120, 20],
+              }),
+              interactive: false,
+            }).addTo(map);
+
+            layer.label = label;
+          }
+        }
+      } else {
+        // Feature is out of view, remove label
+        if (layer.label) {
+          map.removeLayer(layer.label);
+          layer.label = null;
+        }
+      }
+    });
+  };
+
   return {
     layersRef,
     loadRegionsLayer,
@@ -1026,6 +1012,7 @@ export function useMapLayers() {
     loadStreetsLayer,
     loadRealEstateLayer,
     handleRealEstateLabels,
+    handleStreetLabels,
     clearLayers,
     getLayer,
     refreshLabels,

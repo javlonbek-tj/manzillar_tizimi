@@ -11,7 +11,7 @@ export type District = {
   nameRu: string | null;
   code: string;
   regionId: string;
-  region: { nameUz: string };
+  region: { nameUz: string; code: string };
 };
 
 export type Mahalla = {
@@ -28,8 +28,12 @@ export type Mahalla = {
   districtId: string;
   district: {
     nameUz: string;
+    code: string;
     regionId: string;
-    region: { nameUz: string };
+    region: { 
+      nameUz: string;
+      code: string;
+    };
   };
 };
 
@@ -44,8 +48,12 @@ export type Street = {
   mahallaId: string;
   district: {
     nameUz: string;
+    code: string;
     regionId: string;
-    region: { nameUz: string };
+    region: { 
+      nameUz: string;
+      code: string;
+    };
   };
   mahalla: {
     nameUz: string;

@@ -21,6 +21,7 @@ export async function GET(request: Request) {
         region: {
           select: {
             nameUz: true,
+            code: true,
           },
         },
         _count: {

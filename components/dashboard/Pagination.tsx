@@ -9,7 +9,6 @@ interface PaginationProps {
   onItemsPerPageChange: (items: number) => void;
   onPrevious: () => void;
   onNext: () => void;
-  darkMode: boolean;
 }
 
 export function Pagination({
@@ -21,14 +20,11 @@ export function Pagination({
   onItemsPerPageChange,
   onPrevious,
   onNext,
-  darkMode,
 }: PaginationProps) {
   return (
     <div className='flex justify-between items-center mt-4'>
-      <div
-        className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}
-      >
-        Jami: <span className='font-semibold text-blue-600'>{totalItems}</span>
+      <div className="text-sm text-gray-600 dark:text-gray-400">
+        Jami: <span className="font-semibold text-blue-600">{totalItems}</span>
       </div>
 
       <div className='flex items-center gap-2'>
@@ -37,10 +33,8 @@ export function Pagination({
           disabled={currentPage === 1}
           className={`p-2 rounded ${
             currentPage === 1
-              ? 'text-gray-400 cursor-not-allowed'
-              : darkMode
-              ? 'text-white hover:bg-gray-700'
-              : 'text-gray-700 hover:bg-gray-100'
+              ? "text-gray-400 cursor-not-allowed"
+              : "text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
           }`}
         >
           <ChevronLeft className='w-4 h-4' />
@@ -65,10 +59,8 @@ export function Pagination({
                 onClick={() => onPageChange(pageNum)}
                 className={`min-w-8 h-8 text-sm rounded ${
                   currentPage === pageNum
-                    ? 'bg-blue-600 text-white'
-                    : darkMode
-                    ? 'text-gray-300 hover:bg-gray-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? "bg-blue-600 text-white"
+                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
                 {pageNum}
@@ -82,11 +74,7 @@ export function Pagination({
             <span className='text-gray-400'>...</span>
             <button
               onClick={() => onPageChange(totalPages)}
-              className={`min-w-8 h-8 text-sm rounded ${
-                darkMode
-                  ? 'text-gray-300 hover:bg-gray-700'
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
+              className="min-w-8 h-8 text-sm rounded text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
             >
               {totalPages}
             </button>
@@ -98,10 +86,8 @@ export function Pagination({
           disabled={currentPage === totalPages}
           className={`p-2 rounded ${
             currentPage === totalPages
-              ? 'text-gray-400 cursor-not-allowed'
-              : darkMode
-              ? 'text-white hover:bg-gray-700'
-              : 'text-gray-700 hover:bg-gray-100'
+              ? "text-gray-400 cursor-not-allowed"
+              : "text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
           }`}
         >
           <ChevronRight className='w-4 h-4' />
@@ -110,11 +96,7 @@ export function Pagination({
         <select
           value={itemsPerPage}
           onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          className={`ml-4 px-3 py-1.5 text-xs rounded border cursor-pointer ${
-            darkMode
-              ? 'bg-gray-700 border-gray-600 text-white'
-              : 'bg-white border-gray-300 text-gray-900'
-          }`}
+          className="ml-4 px-3 py-1.5 text-xs rounded border cursor-pointer bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
         >
           <option value={10}>10</option>
           <option value={25}>25</option>

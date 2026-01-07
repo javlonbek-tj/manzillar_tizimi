@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { cn } from '@/lib/utils';
 import { fetchSvodData } from '@/services/api';
 import type { SvodData } from '@/types/map';
+import { LoadingSpinner } from '@/components/shared';
 
 export default function SvodPage() {
   const [data, setData] = useState<SvodData | null>(null);
@@ -35,11 +36,8 @@ export default function SvodPage() {
   const renderContent = () => {
     if (loading) {
       return (
-        <div className="flex items-center justify-center h-full">
-          <div className={cn(
-            "text-lg",
-            darkMode ? "text-gray-300" : "text-gray-600"
-          )}>Loading...</div>
+        <div className="flex-1 flex items-center justify-center h-screen">
+          <LoadingSpinner fullPage={false} />
         </div>
       );
     }

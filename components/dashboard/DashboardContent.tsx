@@ -6,6 +6,8 @@ import type { DashboardData, TabType, DashboardItem } from "@/types/dashboard";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useDashboardPagination } from "@/hooks/useDashboardPagination";
 import { useDashboardExport } from "@/hooks/useDashboardExport";
+import { useTheme } from "@/contexts/ThemeContext";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,11 +27,11 @@ import { EditDialog } from "./EditDialog";
 
 export function DashboardContent({
   initialData,
-  darkMode,
 }: {
   initialData: DashboardData;
-  darkMode: boolean;
 }) {
+  const { theme } = useTheme();
+  const darkMode = theme === "dark";
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>("regions");
   const [searchTerm, setSearchTerm] = useState("");
@@ -125,19 +127,12 @@ export function DashboardContent({
   };
 
   const handleEdit = (item: DashboardItem) => {
-    // Addresses cannot be edited from dashboard
-    if (activeTab === 'addresses') {
-      return;
-    }
+    // Addresses cannot be edited from dashboard yet, but we'll show the dialog
     setSelectedItem(item);
     setEditDialogOpen(true);
   };
 
   const handleDelete = (item: DashboardItem) => {
-    // Addresses cannot be deleted from dashboard
-    if (activeTab === 'addresses') {
-      return;
-    }
     setItemToDelete(item);
     setDeleteDialogOpen(true);
   };
@@ -161,6 +156,9 @@ export function DashboardContent({
           break;
         case "streets":
           url = `/api/streets/${itemToDelete.id}`;
+          break;
+        case "addresses":
+          url = `/api/addresses/${itemToDelete.id}`;
           break;
       }
 
@@ -189,21 +187,13 @@ export function DashboardContent({
   };
 
   return (
-    <div
-      className={`min-h-[calc(100vh-4rem)] transition-colors duration-200
-}`}
-    >
+    <div className="min-h-[calc(100vh-4rem)] transition-colors duration-200">
       <div className="mx-auto ">
-        <div
-          className={`${
-            darkMode ? "bg-gray-800" : "bg-white"
-          } rounded-lg shadow-sm`}
-        >
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
           <Tabs
             activeTab={activeTab}
             onTabChange={handleTabChange}
             onAddClick={handleAddClick}
-            darkMode={darkMode}
           />
 
           <DashboardFilters
@@ -216,7 +206,6 @@ export function DashboardContent({
             onDistrictChange={handleDistrictChange}
             availableDistricts={availableDistricts}
             regions={initialData.regions}
-            darkMode={darkMode}
             onExport={handleExport}
             isExporting={isExporting}
             canExport={filteredData.length > 0}
@@ -230,7 +219,6 @@ export function DashboardContent({
               data={paginatedData}
               currentPage={currentPage}
               itemsPerPage={itemsPerPage}
-              darkMode={darkMode}
               onEdit={handleEdit}
               onDelete={handleDelete}
             />
@@ -244,7 +232,6 @@ export function DashboardContent({
               onItemsPerPageChange={handleItemsPerPageChange}
               onPrevious={goToPreviousPage}
               onNext={() => goToNextPage(totalPages)}
-              darkMode={darkMode}
             />
           </div>
         </div>
@@ -257,7 +244,6 @@ export function DashboardContent({
         regions={initialData.regions}
         districts={initialData.districts}
         selectedRegion={selectedRegion}
-        darkMode={darkMode}
         onSuccess={handleSuccess}
       />
 
@@ -268,7 +254,6 @@ export function DashboardContent({
         item={selectedItem}
         regions={initialData.regions}
         districts={initialData.districts}
-        darkMode={darkMode}
         onSuccess={handleSuccess}
       />
 

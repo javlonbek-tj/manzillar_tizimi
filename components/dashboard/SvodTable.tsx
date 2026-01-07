@@ -31,13 +31,14 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className={cn(
-          darkMode ? "bg-gray-600" : "bg-gray-200"
+          "sticky top-0 z-10",
+          darkMode ? "bg-gray-700" : "bg-slate-50 border-b border-slate-200"
         )}>
           <tr>
   <th
     scope="col"
-    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-      darkMode ? 'text-white' : 'text-gray-900'
+    className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${
+      darkMode ? 'text-gray-300' : 'text-slate-600'
     }`}
   >
     Viloyatlar
@@ -45,8 +46,8 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
 
   <th
     scope="col"
-    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-      darkMode ? 'text-white' : 'text-gray-900'
+    className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${
+      darkMode ? 'text-gray-300' : 'text-slate-600'
     }`}
   >
     Mahallalar
@@ -54,8 +55,8 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
 
   <th
     scope="col"
-    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-      darkMode ? 'text-white' : 'text-gray-900'
+    className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${
+      darkMode ? 'text-gray-300' : 'text-slate-600'
     }`}
   >
     Ko&apos;chalar
@@ -63,8 +64,8 @@ export function SvodTable({ data, darkMode }: SvodTableProps) {
 
   <th
     scope="col"
-    className={`px-6 py-3 text-left text-xs font-medium uppercase tracking-wider ${
-      darkMode ? 'text-white' : 'text-gray-900'
+    className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${
+      darkMode ? 'text-gray-300' : 'text-slate-600'
     }`}
   >
     Ko&apos;chmas mulklar

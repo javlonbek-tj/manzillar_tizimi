@@ -26,7 +26,6 @@ interface EditDialogProps {
   item: DashboardItem | null;
   regions?: Region[];
   districts?: District[];
-  darkMode: boolean;
   onSuccess: () => void;
 }
 
@@ -37,7 +36,6 @@ export function EditDialog({
   item,
   regions = [],
   districts = [],
-  darkMode,
   onSuccess,
 }: EditDialogProps) {
   const [loading, setLoading] = useState(false);
@@ -61,29 +59,29 @@ export function EditDialog({
 
       // Extract regionId from item
       if ('regionId' in item) {
-        regionId = item.regionId;
+        regionId = (item as any).regionId || '';
       } else if (
         'district' in item &&
         item.district &&
         'regionId' in item.district
       ) {
         // For mahalla and street items, extract regionId from district
-        regionId = item.district.regionId;
+        regionId = (item.district as any).regionId || '';
       }
 
       setFormData({
-        nameUz: item.nameUz || '',
-        nameRu: item.nameRu || '',
-        code: item.code || '',
-        regionId: regionId,
-        districtId: 'districtId' in item ? item.districtId : '',
-        uzKadName: 'uzKadName' in item ? item.uzKadName || '' : '',
-        geoCode: 'geoCode' in item ? item.geoCode || '' : '',
-        oneId: 'oneId' in item ? item.oneId || '' : '',
-        hidden: 'hidden' in item ? item.hidden : false,
-        mergedIntoId: 'mergedIntoId' in item ? item.mergedIntoId || '' : '',
+        nameUz: 'nameUz' in item ? (item as any).nameUz || '' : '',
+        nameRu: 'nameRu' in item ? (item as any).nameRu || '' : '',
+        code: 'code' in item ? (item as any).code || '' : '',
+        regionId: regionId || '',
+        districtId: 'districtId' in item ? (item as any).districtId || '' : '',
+        uzKadName: 'uzKadName' in item ? (item as any).uzKadName || '' : '',
+        geoCode: 'geoCode' in item ? (item as any).geoCode || '' : '',
+        oneId: 'oneId' in item ? (item as any).oneId || '' : '',
+        hidden: 'hidden' in item ? (item as any).hidden : false,
+        mergedIntoId: 'mergedIntoId' in item ? (item as any).mergedIntoId || '' : '',
         mergedIntoName:
-          'mergedIntoName' in item ? item.mergedIntoName || '' : '',
+          'mergedIntoName' in item ? (item as any).mergedIntoName || '' : '',
       });
     }
   }, [item]);
@@ -180,11 +178,7 @@ export function EditDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className={`max-w-3xl ${
-          darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'
-        }`}
-      >
+      <DialogContent className="max-w-3xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
         <DialogHeader>
           <DialogTitle>{getTitle()}</DialogTitle>
           <DialogDescription className='sr-only'>
@@ -203,7 +197,7 @@ export function EditDialog({
                   setFormData({ ...formData, nameUz: e.target.value })
                 }
                 required
-                className={darkMode ? 'bg-gray-700 text-white' : ''}
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
 
@@ -215,7 +209,7 @@ export function EditDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, nameRu: e.target.value })
                 }
-                className={darkMode ? 'bg-gray-700 text-white' : ''}
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
           </div>
@@ -231,7 +225,7 @@ export function EditDialog({
                   setFormData({ ...formData, code: e.target.value })
                 }
                 required
-                className={darkMode ? 'bg-gray-700 text-white' : ''}
+                className="dark:bg-gray-700 dark:text-white"
               />
             </div>
           ) : (
@@ -245,7 +239,7 @@ export function EditDialog({
                     setFormData({ ...formData, code: e.target.value })
                   }
                   required
-                  className={darkMode ? 'bg-gray-700 text-white' : ''}
+                  className="dark:bg-gray-700 dark:text-white"
                 />
               </div>
 
@@ -263,11 +257,7 @@ export function EditDialog({
                   }
                   required
                   disabled={activeTab !== 'districts'}
-                  className={`w-full px-3 py-2 rounded-md border ${
-                    darkMode
-                      ? 'bg-gray-700 border-gray-600 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } ${
+                  className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${
                     activeTab !== 'districts'
                       ? 'opacity-50 cursor-not-allowed'
                       : ''
@@ -296,11 +286,7 @@ export function EditDialog({
                 }
                 required
                 disabled={!formData.regionId}
-                className={`w-full px-3 py-2 rounded-md border ${
-                  darkMode
-                    ? 'bg-gray-700 border-gray-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-900'
-                } ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 <option value=''>Tuman tanlang</option>
                 {districts
@@ -328,11 +314,7 @@ export function EditDialog({
                     }
                     required
                     disabled={!formData.regionId}
-                    className={`w-full px-3 py-2 rounded-md border ${
-                      darkMode
-                        ? 'bg-gray-700 border-gray-600 text-white'
-                        : 'bg-white border-gray-300 text-gray-900'
-                    } ${
+                    className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${
                       !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
@@ -355,7 +337,7 @@ export function EditDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, uzKadName: e.target.value })
                     }
-                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               </div>
@@ -369,7 +351,7 @@ export function EditDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, geoCode: e.target.value })
                     }
-                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
 
@@ -381,7 +363,7 @@ export function EditDialog({
                     onChange={(e) =>
                       setFormData({ ...formData, oneId: e.target.value })
                     }
-                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
               </div>
@@ -420,7 +402,7 @@ export function EditDialog({
                         })
                       }
                       placeholder='ID'
-                      className={darkMode ? 'bg-gray-700 text-white' : ''}
+                      className="dark:bg-gray-700 dark:text-white"
                     />
                   </div>
 
@@ -438,7 +420,7 @@ export function EditDialog({
                         })
                       }
                       placeholder='Nomi'
-                      className={darkMode ? 'bg-gray-700 text-white' : ''}
+                      className="dark:bg-gray-700 dark:text-white"
                     />
                   </div>
                 </div>

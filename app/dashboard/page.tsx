@@ -1,6 +1,8 @@
 import { Suspense } from 'react';
 import prisma from '@/lib/prisma';
 import { DashboardWrapper } from '@/components/dashboard/DashboardWrapper';
+import { DashboardContent } from '@/components/dashboard/DashboardContent';
+import { LoadingSpinner } from '@/components/shared';
 
 async function getDashboardData() {
   const [regions, districts, mahallas, streets, addresses] = await Promise.all([
@@ -15,7 +17,7 @@ async function getDashboardData() {
         nameRu: true,
         code: true,
         regionId: true,
-        region: { select: { nameUz: true } },
+        region: { select: { nameUz: true, code: true } },
       },
       orderBy: { nameUz: 'asc' },
     }),
@@ -29,11 +31,15 @@ async function getDashboardData() {
         geoCode: true,
         oneId: true,
         districtId: true,
+        hidden: true,
+        mergedIntoId: true,
+        mergedIntoName: true,
         district: {
           select: {
             nameUz: true,
+            code: true,
             regionId: true,
-            region: { select: { nameUz: true } },
+            region: { select: { nameUz: true, code: true } },
           },
         },
       },
@@ -46,6 +52,7 @@ async function getDashboardData() {
         nameRu: true,
         code: true,
         districtId: true,
+        mahallaId: true,
         type: true,
         oldName: true,
         mahalla: {
@@ -54,8 +61,9 @@ async function getDashboardData() {
         district: {
           select: {
             nameUz: true,
+            code: true,
             regionId: true,
-            region: { select: { nameUz: true } },
+            region: { select: { nameUz: true, code: true } },
           },
         },
       },
@@ -86,12 +94,17 @@ async function getDashboardData() {
   return { regions, districts, mahallas, streets, addresses };
 }
 
-export default async function DashboardPage() {
+async function DashboardDataFetcher() {
   const data = await getDashboardData();
+  return <DashboardContent initialData={data} />;
+}
 
+export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <DashboardWrapper initialData={data} />
-    </Suspense>
+    <DashboardWrapper>
+      <Suspense fallback={<LoadingSpinner fullPage={false} />}>
+        <DashboardDataFetcher />
+      </Suspense>
+    </DashboardWrapper>
   );
 }

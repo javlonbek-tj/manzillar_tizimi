@@ -68,6 +68,7 @@ const UzbekistanMap = () => {
     clearLayers,
     getLayer,
     refreshLabels,
+    handleStreetLabels,
   } = useMapLayers();
 
   const { stats, loading: statsLoading } = useDynamicStats(
@@ -94,9 +95,11 @@ const UzbekistanMap = () => {
       const L = (await import('leaflet')).default;
       map.on('zoomend moveend', () => {
         handleRealEstateLabels(map, L as any);
+        handleStreetLabels(map, L as any);
       });
     }
   );
+
 
   // Sync map basemap with global theme toggle (dark <-> satellite).
   useEffect(() => {
@@ -158,7 +161,7 @@ const UzbekistanMap = () => {
   }, [isAddingAddress]);
 
   const handleDistrictClick = useCallback(
-    async (districtId: string) => {
+    async (districtId: string, skipFitBounds: boolean = false) => {
       const L = (await import('leaflet')).default as unknown as Parameters<
         typeof loadMahallasLayer
       >[1];
@@ -198,7 +201,7 @@ const UzbekistanMap = () => {
       setSidebarLevel('mahallas');
 
       const mahallasData = await loadMahallas(districtId);
-      await loadMahallasLayer(map, L, mahallasData, handleMahallaClick);
+      await loadMahallasLayer(map, L, mahallasData, handleMahallaClick, skipFitBounds);
 
       // Load Real Estate for the district (Background)
       try {
@@ -245,7 +248,7 @@ const UzbekistanMap = () => {
   );
 
   const handleRegionClick = useCallback(
-    async (regionId: string) => {
+    async (regionId: string, skipFitBounds: boolean = false) => {
       const L = (await import('leaflet')).default as unknown as Parameters<
         typeof loadDistrictsLayer
       >[1];
@@ -286,7 +289,7 @@ const UzbekistanMap = () => {
       setSidebarLevel('districts');
 
       const districtsData = await loadDistricts(regionId);
-      await loadDistrictsLayer(map, L, districtsData, handleDistrictClick);
+      await loadDistrictsLayer(map, L, districtsData, handleDistrictClick, skipFitBounds);
 
       // also load streets for the whole region (streets of districts in this region)
       try {
@@ -494,6 +497,66 @@ const UzbekistanMap = () => {
     loadRealEstateLayer,
   ]);
 
+  // Automatic Drill-down and Back-navigation
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !mapReady) return;
+
+    const DRILL_IN_DISTRICT = 10;
+    const DRILL_OUT_DISTRICT = 9;
+    const DRILL_IN_MAHALLA = 13;
+    const DRILL_OUT_MAHALLA = 12;
+
+    let timeoutId: NodeJS.Timeout;
+
+    const handleAutoDrill = async () => {
+      const zoom = map.getZoom();
+      const center = map.getCenter();
+      
+      // Automatic Drill-down
+      if (zoom >= DRILL_IN_MAHALLA && sidebarLevel === 'districts' && !loadingMahallas) {
+        const districtLayer = getLayer('districts') as any;
+        if (districtLayer) {
+          let foundDistrictId: string | null = null;
+          districtLayer.eachLayer((layer: any) => {
+            if (foundDistrictId) return;
+            if (layer.getBounds && layer.getBounds().contains(center)) {
+              foundDistrictId = layer.feature?.properties?.id;
+            }
+          });
+          if (foundDistrictId) {
+            await handleDistrictClick(foundDistrictId, true);
+          }
+        }
+      }
+
+      // Automatic Back-navigation (Hysteresis)
+      if (zoom < DRILL_OUT_MAHALLA && sidebarLevel === 'mahallas') {
+        handleBack();
+      }
+    };
+
+    const debouncedAutoDrill = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleAutoDrill, 300);
+    };
+
+    map.on('zoomend moveend', debouncedAutoDrill);
+    return () => {
+      map.off('zoomend moveend', debouncedAutoDrill);
+      clearTimeout(timeoutId);
+    };
+  }, [
+    mapReady,
+    sidebarLevel,
+    loadingDistricts,
+    loadingMahallas,
+    getLayer,
+    handleRegionClick,
+    handleDistrictClick,
+    handleBack
+  ]);
+
   const resetView = useCallback(async () => {
     setSidebarLevel('regions');
     const map = mapInstanceRef.current;
@@ -647,7 +710,6 @@ const UzbekistanMap = () => {
         loading={statsLoading}
       />
 
-      <Legend />
 
       <AddAddressModal
         open={addAddressModalOpen}

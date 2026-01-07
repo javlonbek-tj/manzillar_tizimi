@@ -1,15 +1,15 @@
 // app/layout.tsx
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { Navigation } from '@/components/shared';
-import { ThemeProvider } from '@/contexts/ThemeContext';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Navigation } from "@/components/shared";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Uzbekistan Geographic Map',
-  description: 'Interactive map of Uzbekistan with administrative boundaries',
+  title: "Uzbekistan Geographic Map",
+  description: "Interactive map of Uzbekistan with administrative boundaries",
 };
 
 export default function RootLayout({
@@ -25,7 +25,9 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="flex flex-col h-full">
             <Navigation />
-            <main className="flex-1 flex flex-col relative w-full h-full overflow-hidden">{children}</main>
+            <main className="flex-1 flex flex-col relative w-full h-full overflow-hidden">
+              {children}
+            </main>
           </div>
         </ThemeProvider>
       </body>

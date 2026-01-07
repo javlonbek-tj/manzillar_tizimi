@@ -440,7 +440,7 @@ export function AddAddressModal({
               <Input
                 id='coordinates'
                 value={
-                  latitude !== null && longitude !== null
+                  latitude != null && longitude != null
                     ? `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
                     : ''
                 }

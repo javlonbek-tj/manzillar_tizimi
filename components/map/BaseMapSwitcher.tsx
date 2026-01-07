@@ -22,36 +22,34 @@ export function BaseMapSwitcher({
       }`}
     >
       {/* Dark */}
-      <button
-        onClick={() => onBaseMapChange('dark')}
-        className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+      <div
+        className={`px-4 py-2 text-sm font-medium flex items-center gap-2 cursor-default ${
           currentBaseMap === 'dark'
             ? 'bg-blue-600 text-white'
             : theme === 'dark'
-            ? 'text-gray-300 hover:bg-gray-700'
-            : 'text-gray-800 hover:bg-gray-100'
+            ? 'text-gray-300'
+            : 'text-gray-800'
         }`}
         title="Qorong'i xarita"
       >
         <Moon className='w-4 h-4' />
         Qorong&apos;i
-      </button>
+      </div>
 
       {/* Satellite */}
-      <button
-        onClick={() => onBaseMapChange('satellite')}
-        className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-2 ${
+      <div
+        className={`px-4 py-2 text-sm font-medium flex items-center gap-2 cursor-default ${
           currentBaseMap === 'satellite'
             ? 'bg-blue-600 text-white'
             : theme === 'dark'
-            ? 'text-gray-300 hover:bg-gray-700'
-            : 'text-gray-800 hover:bg-gray-100'
+            ? 'text-gray-300'
+            : 'text-gray-800'
         }`}
         title="Sun'iy yo'ldosh"
       >
         <MapIcon className='w-4 h-4' />
         Sun&apos;iy yo&apos;ldosh
-      </button>
+      </div>
     </div>
   );
 }
