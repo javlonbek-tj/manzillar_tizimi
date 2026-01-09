@@ -1,4 +1,11 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface PaginationProps {
   currentPage: number;
@@ -24,7 +31,7 @@ export function Pagination({
   return (
     <div className='flex justify-between items-center mt-4'>
       <div className="text-sm text-gray-600 dark:text-gray-400">
-        Jami: <span className="font-semibold text-blue-600">{totalItems}</span>
+        Jami: <span className="font-semibold text-primary">{totalItems}</span>
       </div>
 
       <div className='flex items-center gap-2'>
@@ -59,7 +66,7 @@ export function Pagination({
                 onClick={() => onPageChange(pageNum)}
                 className={`min-w-8 h-8 text-sm rounded ${
                   currentPage === pageNum
-                    ? "bg-blue-600 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
                 }`}
               >
@@ -93,16 +100,20 @@ export function Pagination({
           <ChevronRight className='w-4 h-4' />
         </button>
 
-        <select
-          value={itemsPerPage}
-          onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          className="ml-4 px-3 py-1.5 text-xs rounded border cursor-pointer bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+        <Select
+          value={itemsPerPage.toString()}
+          onValueChange={(value) => onItemsPerPageChange(Number(value))}
         >
-          <option value={10}>10</option>
-          <option value={25}>25</option>
-          <option value={50}>50</option>
-          <option value={100}>100</option>
-        </select>
+          <SelectTrigger className="ml-4 w-[80px] h-8 text-xs">
+            <SelectValue placeholder={itemsPerPage.toString()} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="25">25</SelectItem>
+            <SelectItem value="50">50</SelectItem>
+            <SelectItem value="100">100</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
   );

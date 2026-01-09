@@ -28,7 +28,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       '(prefers-color-scheme: dark)'
     ).matches;
 
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    const initialTheme = savedTheme || 'light';
     setTheme(initialTheme);
 
     if (initialTheme === 'dark') {

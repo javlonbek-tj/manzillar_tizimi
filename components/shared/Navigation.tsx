@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Map, BarChart3, User, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import { Logo } from "./Logo";
 
 export function Navigation() {
   const pathname = usePathname();
@@ -13,7 +14,7 @@ export function Navigation() {
   const navItems = [
     { href: "/", label: "Ochiq xarita", icon: Map },
     { href: "/dashboard", label: "Dashboard", icon: BarChart3 },
-    { href: "/profile", label: "Javlon", icon: User },
+    { href: "/profile", label: "Admin", icon: User },
   ];
 
   return (
@@ -28,16 +29,8 @@ export function Navigation() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3">
-            <h1
-              className={cn(
-                "flex gap-2 font-bold text-xl sm:text-2xl tracking-tight transition-colors",
-                theme === "dark" ? "text-white" : "text-gray-900"
-              )}
-            >
-              <span className="drop-shadow-md text-blue-600">Manzillar</span>
-              <span>tizimi</span>
-            </h1>
+          <Link href="/" className="flex items-center">
+            <Logo className="w-auto h-10 sm:h-12 mt-1.5" />
           </Link>
 
           {/* Desktop Navigation */}
@@ -53,9 +46,9 @@ export function Navigation() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "inline-flex items-center px-3 py-2 rounded-lg font-medium text-sm transition-all",
+                    "inline-flex items-center px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200",
                     isActive
-                      ? "bg-blue-600 text-white shadow-md shadow-blue-500/20"
+                      ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20 scale-105"
                       : theme === "dark"
                       ? "text-gray-300 hover:bg-gray-700 hover:text-white"
                       : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -108,7 +101,7 @@ export function Navigation() {
                 className={cn(
                   "flex items-center px-3 py-2 rounded-lg font-medium text-base transition-all",
                   isActive
-                    ? "bg-blue-600 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : theme === "dark"
                     ? "text-gray-300 hover:bg-gray-700"
                     : "text-gray-600 hover:bg-gray-100"

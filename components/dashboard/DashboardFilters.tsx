@@ -1,5 +1,12 @@
 import type { Region, District, TabType } from '@/types/dashboard';
 import { ExportButton } from './ExportButton';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface DashboardFiltersProps {
   activeTab: TabType;
@@ -43,53 +50,65 @@ export function DashboardFilters({
           placeholder='Qidiruv...'
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
-          className="flex-1 min-w-[200px] px-4 py-2 text-sm rounded-lg border transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-400 focus:border-blue-500 shadow-sm focus:outline-none focus:ring-4 focus:ring-blue-500/10"
+          className="flex-1 min-w-[200px] px-4 py-2 text-sm rounded-lg border transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-400 focus:border-primary shadow-sm focus:outline-none focus:ring-4 focus:ring-primary/10"
         />
 
         {/* Region Select */}
         {activeTab !== 'regions' && (
-          <select
-            value={selectedRegion}
-            onChange={(e) => onRegionChange(e.target.value)}
-            className="px-4 py-2 rounded-lg border text-sm cursor-pointer transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 min-w-[200px]"
+          <Select
+            value={selectedRegion || "all"}
+            onValueChange={(value) => onRegionChange(value === "all" ? "" : value)}
           >
-            <option value=''>Hudud tanlang</option>
-            {regions.map((region) => (
-              <option key={region.id} value={region.id}>
-                {region.nameUz}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Hudud tanlang" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Hudud tanlang</SelectItem>
+              {regions.map((region) => (
+                <SelectItem key={region.id} value={region.id}>
+                  {region.nameUz}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         )}
 
         {/* District Select */}
         {(activeTab === 'mahallas' || activeTab === 'streets' || activeTab === 'addresses') &&
           selectedRegion && (
-            <select
-              value={selectedDistrict}
-              onChange={(e) => onDistrictChange(e.target.value)}
-              className="px-4 py-2 rounded-lg border text-sm bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+            <Select
+              value={selectedDistrict || "all"}
+              onValueChange={(value) => onDistrictChange(value === "all" ? "" : value)}
             >
-              <option value=''>Tuman tanlang</option>
-              {availableDistricts.map((district) => (
-                <option key={district.id} value={district.id}>
-                  {district.nameUz}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-[200px]">
+                <SelectValue placeholder="Tuman tanlang" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tuman tanlang</SelectItem>
+                {availableDistricts.map((district) => (
+                  <SelectItem key={district.id} value={district.id}>
+                    {district.nameUz}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           )}
 
         {/* Hidden Status Filter for Mahallas */}
         {activeTab === 'mahallas' && (
-          <select
-            value={selectedHidden}
-            onChange={(e) => onHiddenChange(e.target.value)}
-            className="px-4 py-2 rounded-lg border text-sm cursor-pointer transition-all bg-white dark:bg-gray-700 border-slate-200 dark:border-gray-600 text-slate-900 dark:text-white shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 min-w-[200px]"
+          <Select
+            value={selectedHidden || "all"}
+            onValueChange={(value) => onHiddenChange(value === "all" ? "" : value)}
           >
-            <option value=''>Yashirilgan (hammas)</option>
-            <option value='true'>Yashirilgan (ha)</option>
-            <option value='false'>Yashirilgan (yo'q)</option>
-          </select>
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Yashirilgan (hammasi)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Yashirilgan (hammasi)</SelectItem>
+              <SelectItem value="true">Yashirilgan (ha)</SelectItem>
+              <SelectItem value="false">Yashirilgan (yo'q)</SelectItem>
+            </SelectContent>
+          </Select>
         )}
 
         {/* Export Button */}

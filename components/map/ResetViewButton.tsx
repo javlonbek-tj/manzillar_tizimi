@@ -9,7 +9,7 @@ export function ResetViewButton({ onReset }: ResetViewButtonProps) {
   const { theme } = useTheme();
 
   return (
-    <div className="bottom-4 left-84 z-1000 absolute flex flex-col gap-3">
+    <div className="bottom-4 left-8 z-1000 absolute flex flex-col gap-3">
       {/* HOME / RESET VIEW */}
       <button
         onClick={onReset}

@@ -11,7 +11,8 @@ type LeafletModule = {
 
 export function useLeafletMap(
   mapRef: React.RefObject<HTMLDivElement | null>,
-  onMapReady: (map: Map, L: LeafletModule) => Promise<void>
+  onMapReady: (map: Map, L: LeafletModule) => Promise<void>,
+  initialBaseMap: keyof typeof baseMaps = 'satellite'
 ) {
   const mapInstance = useRef<Map | null>(null);
   const tileLayerRef = useRef<TileLayer | null>(null);
@@ -41,11 +42,24 @@ export function useLeafletMap(
         });
 
         // Initial tile layer
-        tileLayerRef.current = L.tileLayer(baseMaps.dark.url, {
-          attribution: baseMaps.dark.attribution,
-          subdomains: 'abcd',
-          maxZoom: 20,
-        }).addTo(map);
+        const TRANSPARENT_TILE =
+          'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+
+        if (initialBaseMap === 'satellite') {
+          tileLayerRef.current = L.tileLayer(baseMaps.satellite.url, {
+            attribution: baseMaps.satellite.attribution,
+            subdomains: '',
+            maxNativeZoom: 17,
+            maxZoom: 18,
+            errorTileUrl: TRANSPARENT_TILE,
+          }).addTo(map);
+        } else {
+          tileLayerRef.current = L.tileLayer(baseMaps[initialBaseMap].url, {
+            attribution: baseMaps[initialBaseMap].attribution,
+            subdomains: 'abcd',
+            maxZoom: 20,
+          }).addTo(map);
+        }
 
         mapInstance.current = map;
         await onMapReadyRef.current(map, L);

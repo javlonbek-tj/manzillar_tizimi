@@ -75,18 +75,21 @@ export function useMapLayers() {
           icon: L.divIcon({
             className: 'region-label',
             html: `<div style="
-              color: ${isDark ? 'white' : '#1f2937'};
-              background: ${
-                isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.93)'
-              };
-              padding: 4px 10px;
-              border-radius: 6px;
+              color: ${isDark ? '#ffffff' : '#000000'};
               font-weight: bold;
               font-size: 14px;
-              text-shadow: ${isDark ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none'};
-              box-shadow: 0 2px 6px ${
-                isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
-              };
+              text-shadow: 
+                -1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                 1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                -1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                 1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                -2px -2px 4px ${isDark ? '#000000' : '#ffffff'},
+                 2px -2px 4px ${isDark ? '#000000' : '#ffffff'},
+                -2px  2px 4px ${isDark ? '#000000' : '#ffffff'},
+                 2px  2px 4px ${isDark ? '#000000' : '#ffffff'};
+              background: transparent;
+              padding: 0;
+              box-shadow: none;
               white-space: nowrap;
               pointer-events: none;
               text-align: center;
@@ -173,18 +176,21 @@ export function useMapLayers() {
           icon: L.divIcon({
             className: 'district-label',
             html: `<div style="
-              color: ${isDark ? 'white' : '#1f2937'};
-              background: ${
-                isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.93)'
-              };
-              padding: 3px 8px;
-              border-radius: 5px;
+              color: ${isDark ? '#ffffff' : '#000000'};
               font-weight: 600;
               font-size: 12px;
-              text-shadow: ${isDark ? '1px 1px 3px rgba(0,0,0,0.8)' : 'none'};
-              box-shadow: 0 2px 6px ${
-                isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
-              };
+              text-shadow: 
+                -1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                 1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                -1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                 1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                -2px -2px 3px ${isDark ? '#000000' : '#ffffff'},
+                 2px -2px 3px ${isDark ? '#000000' : '#ffffff'},
+                -2px  2px 3px ${isDark ? '#000000' : '#ffffff'},
+                 2px  2px 3px ${isDark ? '#000000' : '#ffffff'};
+              background: transparent;
+              padding: 0;
+              box-shadow: none;
               white-space: nowrap;
               pointer-events: none;
               text-align: center;
@@ -269,18 +275,27 @@ export function useMapLayers() {
           ? [center.coordinates[1], center.coordinates[0]]
           : [center.lat, center.lng];
 
+        const isDark = document.documentElement.classList.contains('dark');
         const label = L.marker(centerCoords as LatLngExpression, {
           icon: L.divIcon({
             className: 'mahalla-label',
             html: `<div style="
-              background: rgba(255, 255, 255, 0.9);
-              color: #1f2937;
-              padding: 4px 8px;
-              border-radius: 6px;
+              background: transparent;
+              color: ${isDark ? '#ffffff' : '#000000'};
+              padding: 0;
+              border-radius: 0;
               font-weight: 500;
               font-size: 10px;
-              text-shadow: none;
-              box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+              text-shadow: 
+                -1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                 1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                -1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                 1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                -2px -2px 2px ${isDark ? '#000000' : '#ffffff'},
+                 2px -2px 2px ${isDark ? '#000000' : '#ffffff'},
+                -2px  2px 2px ${isDark ? '#000000' : '#ffffff'},
+                 2px  2px 2px ${isDark ? '#000000' : '#ffffff'};
+              box-shadow: none;
               white-space: normal;
               word-break: break-word;
               pointer-events: none;
@@ -594,11 +609,11 @@ export function useMapLayers() {
 
     const realEstateLayer = L.geoJSON(undefined, {
       style: {
-        fillColor: '#f8c850ff', // Amber
-        weight: 2,
-        opacity: 1,
-        color: '#8f6f4cff', // Border Amber
-        fillOpacity: 0.5,
+        fillColor: '#fbbf24', // Amber-400
+        weight: 1.5,
+        opacity: 0.8,
+        color: '#d97706', // Amber-600
+        fillOpacity: 0.2, // Transparent to see map below
       },
       onEachFeature: (feature: any, layer: LayerWithLabel) => {
         const props = feature.properties;
@@ -739,14 +754,21 @@ export function useMapLayers() {
       const div = element.querySelector('div');
       if (!div) return;
 
-      div.style.color = isDark ? 'white' : '#1f2937';
-      div.style.background = isDark
-        ? 'rgba(0,0,0,0.6)'
-        : 'rgba(255,255,255,0.93)';
-      div.style.textShadow = isDark ? '2px 2px 4px rgba(0,0,0,0.8)' : 'none';
-      div.style.boxShadow = `0 2px 6px ${
-        isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
-      }`;
+      div.style.color = isDark ? '#ffffff' : '#000000';
+      div.style.background = 'transparent';
+      div.style.padding = '0';
+      div.style.borderRadius = '0';
+      const haloColor = isDark ? '#000000' : '#ffffff';
+      div.style.textShadow = `
+        -1px -1px 0 ${haloColor},
+         1px -1px 0 ${haloColor},
+        -1px  1px 0 ${haloColor},
+         1px  1px 0 ${haloColor},
+        -2px -2px 4px ${haloColor},
+         2px -2px 4px ${haloColor},
+        -2px  2px 4px ${haloColor},
+         2px  2px 4px ${haloColor}`;
+      div.style.boxShadow = 'none';
     };
 
     // Update regions labels
@@ -779,30 +801,22 @@ export function useMapLayers() {
           const el = tt.getElement?.();
           if (!el) return;
           if (el.classList.contains('street-selected-tooltip')) {
-            el.style.color = isDark ? 'white' : '#1f2937';
-            el.style.background = isDark
-              ? 'rgba(0,0,0,0.6)'
-              : 'rgba(255,255,255,0.93)';
+            el.style.color = '#1f2937';
+            el.style.background = 'rgba(255, 255, 255, 0.9)';
             el.style.padding = '4px 8px';
             el.style.borderRadius = '6px';
-            el.style.boxShadow = `0 2px 6px ${
-              isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
-            }`;
+            el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
             el.style.fontWeight = '600';
             el.style.whiteSpace = 'nowrap';
           }
           if (el.classList.contains('street-dynamic-label')) {
             const inner = el.querySelector('div');
             if (inner) {
-              inner.style.color = isDark ? 'white' : '#1f2937';
-              inner.style.background = isDark
-                ? 'rgba(0,0,0,0.6)'
-                : 'rgba(255,255,255,0.93)';
+              inner.style.color = '#1f2937';
+              inner.style.background = 'rgba(255, 255, 255, 0.9)';
               inner.style.padding = '2px 6px';
               inner.style.borderRadius = '6px';
-              inner.style.boxShadow = isDark
-                ? '0 1px 4px rgba(0,0,0,0.4)'
-                : '0 1px 4px rgba(0,0,0,0.08)';
+              inner.style.boxShadow = '0 1px 4px rgba(0,0,0,0.1)';
               inner.style.fontWeight = '500';
               inner.style.whiteSpace = 'nowrap';
             }
@@ -826,19 +840,22 @@ export function useMapLayers() {
         const div = element.querySelector('div');
         if (!div) return;
 
-        div.style.color = isDark ? 'white' : '#1f2937';
-        div.style.background = isDark
-          ? 'rgba(217, 119, 6, 0.8)' // Amber-600
-          : 'rgba(251, 191, 36, 0.9)'; // Amber-400
-        div.style.textShadow = isDark
-          ? '1px 1px 2px rgba(0,0,0,0.8)'
-          : '1px 1px 2px rgba(0,0,0,0.2)';
-        div.style.boxShadow = `0 1px 3px ${
-          isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'
-        }`;
-        div.style.border = `1px solid ${
-          isDark ? 'rgba(180, 83, 9, 0.6)' : 'rgba(180, 83, 9, 0.4)'
-        }`;
+        div.style.color = isDark ? '#ffffff' : '#000000';
+        div.style.background = 'transparent';
+        div.style.padding = '0';
+        div.style.borderRadius = '0';
+        const haloColor = isDark ? '#000000' : '#ffffff';
+        div.style.textShadow = `
+          -1px -1px 0 ${haloColor},
+           1px -1px 0 ${haloColor},
+          -1px  1px 0 ${haloColor},
+           1px  1px 0 ${haloColor},
+          -1px -1px 1px ${haloColor},
+           1px -1px 1px ${haloColor},
+          -1px  1px 1px ${haloColor},
+           1px  1px 1px ${haloColor}`;
+        div.style.boxShadow = 'none';
+        div.style.border = 'none';
       });
     }
   };
@@ -848,6 +865,7 @@ export function useMapLayers() {
     L: LeafletType
   ) => {
     if (!layersRef.current.realEstate) return;
+    if (!map.hasLayer(layersRef.current.realEstate)) return;
 
     const zoom = map.getZoom();
     const threshold = 17; // Only show house numbers when zoomed in close enough
@@ -886,19 +904,26 @@ export function useMapLayers() {
             icon: L.divIcon({
               className: 'real-estate-label',
               html: `<div style="
-                color: ${isDark ? 'white' : '#1f2937'};
-                background: ${isDark ? 'rgba(217, 119, 6, 0.8)' : 'rgba(251, 191, 36, 0.9)'};
-                padding: 2px 6px;
-                border-radius: 4px;
+                color: ${isDark ? '#ffffff' : '#000000'};
                 font-weight: 600;
                 font-size: 11px;
-                text-shadow: ${isDark ? '1px 1px 2px rgba(0,0,0,0.8)' : '1px 1px 2px rgba(0,0,0,0.2)'};
-                box-shadow: 0 1px 3px ${isDark ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.1)'};
+                text-shadow: 
+                  -1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                   1px -1px 0 ${isDark ? '#000000' : '#ffffff'},
+                  -1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                   1px  1px 0 ${isDark ? '#000000' : '#ffffff'},
+                  -1px -1px 1px ${isDark ? '#000000' : '#ffffff'},
+                   1px -1px 1px ${isDark ? '#000000' : '#ffffff'},
+                  -1px  1px 1px ${isDark ? '#000000' : '#ffffff'},
+                   1px  1px 1px ${isDark ? '#000000' : '#ffffff'};
+                background: transparent;
+                padding: 0;
+                box-shadow: none;
                 white-space: nowrap;
                 pointer-events: none;
                 text-align: center;
                 display: inline-block;
-                border: 1px solid ${isDark ? 'rgba(180, 83, 9, 0.6)' : 'rgba(180, 83, 9, 0.4)'};
+                border: none;
               ">${props.houseNumber}</div>`,
               iconSize: [40, 20],
             }),
@@ -919,9 +944,21 @@ export function useMapLayers() {
 
   const handleStreetLabels = (
     map: LeafletMap,
-    L: LeafletType
+    L: LeafletType,
+    showLabels: boolean = true
   ) => {
     if (!layersRef.current.streets) return;
+
+    // If toggled off, remove all existing labels and return
+    if (!showLabels) {
+      layersRef.current.streets.eachLayer((layer: any) => {
+        if (layer.label) {
+          map.removeLayer(layer.label);
+          layer.label = null;
+        }
+      });
+      return;
+    }
 
     const zoom = map.getZoom();
     const threshold = 15; // Show street names when zoomed in enough
@@ -973,14 +1010,14 @@ export function useMapLayers() {
               icon: L.divIcon({
                 className: 'street-dynamic-label',
                 html: `<div style="
-                  color: ${isDark ? 'white' : '#1f2937'};
-                  background: ${isDark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.93)'};
+                  color: #1f2937;
+                  background: rgba(255, 255, 255, 0.9);
                   padding: 2px 6px;
                   border-radius: 6px;
                   font-weight: 500;
                   font-size: 11px;
-                  text-shadow: ${isDark ? '1px 1px 3px rgba(0,0,0,0.8)' : 'none'};
-                  box-shadow: 0 1px 4px ${isDark ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.08)'};
+                  text-shadow: none;
+                  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
                   white-space: nowrap;
                   pointer-events: none;
                   text-align: center;
@@ -1004,6 +1041,29 @@ export function useMapLayers() {
     });
   };
 
+  const toggleRealEstateLayer = (map: LeafletMap, show: boolean) => {
+    const layer = layersRef.current.realEstate;
+    if (!layer) return;
+
+    if (show) {
+      if (!map.hasLayer(layer)) {
+        layer.addTo(map);
+        // Ensure popups are re-binded/active if needed, though they are attached to features
+      }
+    } else {
+      if (map.hasLayer(layer)) {
+        map.removeLayer(layer);
+      }
+      // Also remove all labels associated with it
+      layer.eachLayer((l: LayerWithLabel) => {
+        if (l.label) {
+          map.removeLayer(l.label);
+          l.label = null;
+        }
+      });
+    }
+  };
+
   return {
     layersRef,
     loadRegionsLayer,
@@ -1015,6 +1075,7 @@ export function useMapLayers() {
     handleStreetLabels,
     clearLayers,
     getLayer,
+    toggleRealEstateLayer,
     refreshLabels,
   };
 }

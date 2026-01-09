@@ -24,7 +24,7 @@ export function AddButton({ activeTab, onClick }: AddButtonProps) {
   return (
     <Button
       onClick={onClick}
-      className="ml-auto cursor-pointer bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white"
+      className="ml-auto cursor-pointer bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
     >
       <Plus className='w-4 h-4' />
       {tabLabels[activeTab]}

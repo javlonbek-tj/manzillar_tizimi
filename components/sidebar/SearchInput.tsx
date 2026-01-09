@@ -36,7 +36,7 @@ export function SearchInput({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={cn(
-            'py-2 pr-4 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-full',
+            'py-2 pr-4 pl-10 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary w-full',
             theme === 'dark'
               ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400'
               : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500'

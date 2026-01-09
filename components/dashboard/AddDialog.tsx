@@ -12,6 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { TabType, Region, District } from '@/types/dashboard';
 
 interface AddDialogProps {
@@ -216,26 +223,27 @@ export function AddDialog({
 
               <div className='space-y-2'>
                 <Label htmlFor='regionId'>Viloyat *</Label>
-                <select
-                  id='regionId'
+                <Select
                   value={formData.regionId}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      regionId: e.target.value,
+                      regionId: value,
                       districtId: '',
                     })
                   }
-                  required
-                  className="w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
                 >
-                  <option value=''>Viloyat tanlang</option>
-                  {regions.map((region) => (
-                    <option key={region.id} value={region.id}>
-                      {region.nameUz}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="regionId">
+                    <SelectValue placeholder="Viloyat tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regions.map((region) => (
+                      <SelectItem key={region.id} value={region.id}>
+                        {region.nameUz}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
@@ -246,27 +254,26 @@ export function AddDialog({
               <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='districtId'>Tuman *</Label>
-                  <select
-                    id='districtId'
+                  <Select
                     value={formData.districtId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, districtId: e.target.value })
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, districtId: value })
                     }
-                    required
                     disabled={!formData.regionId}
-                    className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${
-                      !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
                   >
-                    <option value=''>Tuman tanlang</option>
-                    {districts
-                      .filter((d) => d.regionId === formData.regionId)
-                      .map((district) => (
-                        <option key={district.id} value={district.id}>
-                          {district.nameUz}
-                        </option>
-                      ))}
-                  </select>
+                    <SelectTrigger id="districtId">
+                      <SelectValue placeholder="Tuman tanlang" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {districts
+                        .filter((d) => d.regionId === formData.regionId)
+                        .map((district) => (
+                          <SelectItem key={district.id} value={district.id}>
+                            {district.nameUz}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className='space-y-2'>
@@ -369,25 +376,26 @@ export function AddDialog({
           {activeTab === 'streets' && (
             <div className='space-y-2'>
               <Label htmlFor='districtId'>Tuman *</Label>
-              <select
-                id='districtId'
+              <Select
                 value={formData.districtId}
-                onChange={(e) =>
-                  setFormData({ ...formData, districtId: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, districtId: value })
                 }
-                required
                 disabled={!formData.regionId}
-                className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <option value=''>Tuman tanlang</option>
-                {districts
-                  .filter((d) => d.regionId === formData.regionId)
-                  .map((district) => (
-                    <option key={district.id} value={district.id}>
-                      {district.nameUz}
-                    </option>
-                  ))}
-              </select>
+                <SelectTrigger id="districtId">
+                  <SelectValue placeholder="Tuman tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts
+                    .filter((d) => d.regionId === formData.regionId)
+                    .map((district) => (
+                      <SelectItem key={district.id} value={district.id}>
+                        {district.nameUz}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>

@@ -164,3 +164,4 @@ model Address {
   @@index([streetId])
   @@map("addresses")
 }
+

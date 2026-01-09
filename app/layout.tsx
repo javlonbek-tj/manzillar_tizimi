@@ -5,7 +5,7 @@ import "./globals.css";
 import { Navigation } from "@/components/shared";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
   title: "Uzbekistan Geographic Map",
@@ -18,9 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="uz" className="h-full">
+    <html lang="uz" className={`h-full ${inter.variable}`}>
       <body
-        className={`${inter.className} h-full m-0 p-0 bg-gray-50 dark:bg-gray-900 overflow-hidden`}
+        className={`${inter.className} h-full m-0 p-0 bg-gray-50 dark:bg-gray-900 overflow-hidden font-sans`}
       >
         <ThemeProvider>
           <div className="flex flex-col h-full">

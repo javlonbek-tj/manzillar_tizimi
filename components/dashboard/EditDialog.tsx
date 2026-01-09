@@ -12,6 +12,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type {
   TabType,
   Region,
@@ -245,31 +252,28 @@ export function EditDialog({
 
               <div className='space-y-2'>
                 <Label htmlFor='edit-regionId'>Viloyat *</Label>
-                <select
-                  id='edit-regionId'
+                <Select
                   value={formData.regionId}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setFormData({
                       ...formData,
-                      regionId: e.target.value,
+                      regionId: value,
                       districtId: '',
                     })
                   }
-                  required
                   disabled={activeTab !== 'districts'}
-                  className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${
-                    activeTab !== 'districts'
-                      ? 'opacity-50 cursor-not-allowed'
-                      : ''
-                  }`}
                 >
-                  <option value=''>Viloyat tanlang</option>
-                  {regions.map((region) => (
-                    <option key={region.id} value={region.id}>
-                      {region.nameUz}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="edit-regionId">
+                    <SelectValue placeholder="Viloyat tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {regions.map((region) => (
+                      <SelectItem key={region.id} value={region.id}>
+                        {region.nameUz}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
@@ -278,25 +282,26 @@ export function EditDialog({
           {activeTab === 'streets' && (
             <div className='space-y-2'>
               <Label htmlFor='edit-districtId'>Tuman *</Label>
-              <select
-                id='edit-districtId'
+              <Select
                 value={formData.districtId}
-                onChange={(e) =>
-                  setFormData({ ...formData, districtId: e.target.value })
+                onValueChange={(value) =>
+                  setFormData({ ...formData, districtId: value })
                 }
-                required
                 disabled={!formData.regionId}
-                className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${!formData.regionId ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                <option value=''>Tuman tanlang</option>
-                {districts
-                  .filter((d) => d.regionId === formData.regionId)
-                  .map((district) => (
-                    <option key={district.id} value={district.id}>
-                      {district.nameUz}
-                    </option>
-                  ))}
-              </select>
+                <SelectTrigger id="edit-districtId">
+                  <SelectValue placeholder="Tuman tanlang" />
+                </SelectTrigger>
+                <SelectContent>
+                  {districts
+                    .filter((d) => d.regionId === formData.regionId)
+                    .map((district) => (
+                      <SelectItem key={district.id} value={district.id}>
+                        {district.nameUz}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 
@@ -306,27 +311,26 @@ export function EditDialog({
               <div className='grid grid-cols-2 gap-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='edit-districtId'>Tuman *</Label>
-                  <select
-                    id='edit-districtId'
-                    value={formData.districtId}
-                    onChange={(e) =>
-                      setFormData({ ...formData, districtId: e.target.value })
-                    }
-                    required
-                    disabled={!formData.regionId}
-                    className={`w-full px-3 py-2 rounded-md border bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white ${
-                      !formData.regionId ? 'opacity-50 cursor-not-allowed' : ''
-                    }`}
-                  >
-                    <option value=''>Tuman tanlang</option>
+                <Select
+                  value={formData.districtId}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, districtId: value })
+                  }
+                  disabled={!formData.regionId}
+                >
+                  <SelectTrigger id="edit-districtId">
+                    <SelectValue placeholder="Tuman tanlang" />
+                  </SelectTrigger>
+                  <SelectContent>
                     {districts
                       .filter((d) => d.regionId === formData.regionId)
                       .map((district) => (
-                        <option key={district.id} value={district.id}>
+                        <SelectItem key={district.id} value={district.id}>
                           {district.nameUz}
-                        </option>
+                        </SelectItem>
                       ))}
-                  </select>
+                  </SelectContent>
+                </Select>
                 </div>
 
                 <div className='space-y-2'>

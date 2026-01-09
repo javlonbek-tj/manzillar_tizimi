@@ -134,7 +134,7 @@ export function SidebarList({
                   className={cn(
                     'px-3 py-2 rounded w-full text-sm text-left transition-colors',
                     selectedMahalla?.id === mahalla.id
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
                       : theme === 'dark'
                       ? 'text-white hover:bg-gray-700'
                       : 'text-gray-900 hover:bg-gray-100'

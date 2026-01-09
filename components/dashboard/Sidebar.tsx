@@ -8,14 +8,14 @@ import { LayoutDashboard, Map } from "lucide-react";
 
 const sidebarItems = [
   {
-    name: "Dashboard",
-    href: "/dashboard/svod",
-    icon: LayoutDashboard,
-  },
-  {
     name: "Manzil tuzilmasi",
     href: "/dashboard",
     icon: Map,
+  },
+  {
+    name: "Manzil tahlil",
+    href: "/dashboard/svod",
+    icon: LayoutDashboard,
   },
 ];
 

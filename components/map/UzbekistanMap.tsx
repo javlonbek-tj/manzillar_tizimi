@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useCallback, useEffect } from 'react';
-import { Loader2Icon } from 'lucide-react';
+import { Loader2Icon, EyeIcon, EyeOffIcon } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import type { Map } from 'leaflet';
 import type { RegionData, DistrictData, MahallaData } from '@/types/map';
@@ -44,7 +44,10 @@ const UzbekistanMap = () => {
     null
   );
   const [searchTerm, setSearchTerm] = useState('');
-  const [baseMap, setBaseMap] = useState<BaseMapKey>('dark');
+  const [baseMap, setBaseMap] = useState<BaseMapKey>('satellite');
+  const [showRealEstate, setShowRealEstate] = useState(true);
+  const [showStreetLabels, setShowStreetLabels] = useState(true);
+  const showStreetLabelsRef = useRef(showStreetLabels);
 
   const {
     regions,
@@ -69,6 +72,7 @@ const UzbekistanMap = () => {
     getLayer,
     refreshLabels,
     handleStreetLabels,
+    toggleRealEstateLayer,
   } = useMapLayers();
 
   const { stats, loading: statsLoading } = useDynamicStats(
@@ -95,7 +99,7 @@ const UzbekistanMap = () => {
       const L = (await import('leaflet')).default;
       map.on('zoomend moveend', () => {
         handleRealEstateLabels(map, L as any);
-        handleStreetLabels(map, L as any);
+        handleStreetLabels(map, L as any, showStreetLabelsRef.current);
       });
     }
   );
@@ -106,18 +110,8 @@ const UzbekistanMap = () => {
     if (!mapReady || !changeBaseMapInternal) return;
 
     // If user selected a different basemap explicitly, don't override it on theme change.
-    if (baseMap !== 'dark' && baseMap !== 'satellite') return;
+    // Sync logic removed to keep basemap independent of theme.
 
-    const desiredBase: BaseMapKey = theme === 'dark' ? 'dark' : 'satellite';
-    if (desiredBase !== baseMap) {
-      // update leaflet tile layer and local state
-      changeBaseMapInternal(desiredBase).catch((err) => {
-        // swallow errors but log for debugging
-        // eslint-disable-next-line no-console
-        console.error('Failed to change base map on theme change', err);
-      });
-      setBaseMap(desiredBase);
-    }
 
     // Refresh label colors when theme changes
     const map = mapInstanceRef.current;
@@ -159,6 +153,25 @@ const UzbekistanMap = () => {
       container.style.cursor = '';
     }
   }, [isAddingAddress]);
+
+  // Sync ref and trigger updates
+  useEffect(() => {
+    showStreetLabelsRef.current = showStreetLabels;
+    const map = mapInstanceRef.current;
+    if (map) {
+      // Force update of street labels
+      import('leaflet').then((L) => {
+        handleStreetLabels(map, L.default as any, showStreetLabels);
+      });
+    }
+  }, [showStreetLabels, handleStreetLabels]);
+
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (map) {
+      toggleRealEstateLayer(map, showRealEstate);
+    }
+  }, [showRealEstate, toggleRealEstateLayer, mapReady]);
 
   const handleDistrictClick = useCallback(
     async (districtId: string, skipFitBounds: boolean = false) => {
@@ -398,16 +411,19 @@ const UzbekistanMap = () => {
             layerWithFeature.getBounds
           ) {
             /*
-             * Removed fitBounds to prevent auto-zooming.
-             * User wants to stay at current zoom level when clicking mahalla.
+             * fitBounds is applied only when latlng is NOT provided,
+             * implying a sidebar selection rather than a direct map click.
+             * This ensures the map zooms to the mahalla when selected from the list.
              */
-            // const bounds = layerWithFeature.getBounds();
-            // if (bounds) {
-            //   map.fitBounds(bounds, {
-            //     padding: [50, 50],
-            //     maxZoom: 19,
-            //   });
-            // }
+            if (!latlng) {
+              const bounds = layerWithFeature.getBounds();
+              if (bounds) {
+                map.fitBounds(bounds, {
+                  padding: [50, 50],
+                  maxZoom: 17, // Adjusted maxZoom to avoid being too close
+                });
+              }
+            }
           }
         });
 
@@ -652,7 +668,8 @@ const UzbekistanMap = () => {
         onBack={handleBack}
       />
 
-      <MapContainer ref={mapRef} className='flex-1 w-full h-full' />
+      <div className="relative flex-1 w-full h-full">
+        <MapContainer ref={mapRef} className='w-full h-full' />
 
       <BaseMapSwitcher
         currentBaseMap={baseMap}
@@ -661,9 +678,33 @@ const UzbekistanMap = () => {
 
       <ResetViewButton onReset={resetView} />
 
+      {/* Layer Toggles */}
+      <div className='bottom-24 right-4 z-[1000] absolute flex flex-col gap-2'>
+        <button
+          onClick={() => setShowRealEstate(!showRealEstate)}
+          className={`p-2 rounded-lg shadow-lg transition-colors ${
+            theme === 'dark' ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-800 hover:bg-gray-50'
+          }`}
+          title={showRealEstate ? "Ko'chmas mulkni yashirish" : "Ko'chmas mulkni ko'rsatish"}
+        >
+          {showRealEstate ? <EyeIcon className="w-5 h-5" /> : <EyeOffIcon className="w-5 h-5 text-gray-400" />}
+          <span className="sr-only">Ko'chmas mulk</span>
+        </button>
+        <button
+          onClick={() => setShowStreetLabels(!showStreetLabels)}
+          className={`p-2 rounded-lg shadow-lg transition-colors ${
+            theme === 'dark' ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-white text-gray-800 hover:bg-gray-50'
+          }`}
+          title={showStreetLabels ? "Ko'cha nomlarini yashirish" : "Ko'cha nomlarini ko'rsatish"}
+        >
+          {showStreetLabels ? <span className="font-bold text-xs px-0.5">Aa</span> : <span className="font-bold text-xs px-0.5 text-gray-400 line-through">Aa</span>}
+          <span className="sr-only">Ko'cha nomlari</span>
+        </button>
+      </div>
+
       {/* Add Address Button - Only show when mahalla is selected */}
       {selectedMahalla && (
-        <div className='bottom-4 left-4 z-[1000] absolute'>
+        <div className='absolute top-[20px] left-[50px] z-[1000]'>
           <button
             onClick={() => {
               setIsAddingAddress(!isAddingAddress);
@@ -672,7 +713,7 @@ const UzbekistanMap = () => {
               'flex items-center gap-2 shadow-lg px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200',
               isAddingAddress
                 ? 'bg-green-600 hover:bg-green-700 text-white scale-105 ring-4 ring-green-600/20'
-                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
             )}
           >
             {isAddingAddress ? (
@@ -711,21 +752,22 @@ const UzbekistanMap = () => {
       />
 
 
-      <AddAddressModal
-        open={addAddressModalOpen}
-        onOpenChange={setAddAddressModalOpen}
-        latitude={clickedLat}
-        longitude={clickedLng}
-        mahallaId={selectedMahalla?.code}
-        mahallaName={selectedMahalla?.nameUz}
-        districtId={selectedDistrict?.id}
-        districtName={selectedDistrict?.nameUz}
-        regionId={selectedRegion?.id}
-        regionName={selectedRegion?.nameUz}
-        onSuccess={() => {
-          // Optionally refresh data or show success message
-        }}
-      />
+        <AddAddressModal
+          open={addAddressModalOpen}
+          onOpenChange={setAddAddressModalOpen}
+          latitude={clickedLat}
+          longitude={clickedLng}
+          mahallaId={selectedMahalla?.code}
+          mahallaName={selectedMahalla?.nameUz}
+          districtId={selectedDistrict?.id}
+          districtName={selectedDistrict?.nameUz}
+          regionId={selectedRegion?.id}
+          regionName={selectedRegion?.nameUz}
+          onSuccess={() => {
+            // Optionally refresh data or show success message
+          }}
+        />
+      </div>
     </div>
   );
 };
